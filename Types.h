@@ -20,8 +20,6 @@
 
 
 
-
-
 // Changing this changes the type for the scalar.
 // So you can change this to double for more accuracy
 typedef double scalar;

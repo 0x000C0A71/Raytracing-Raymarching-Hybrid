@@ -3,4 +3,4 @@ project(Raytracing_Raymarching_Hybrid)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(Raytracing_Raymarching_Hybrid main.cpp)
+add_executable(Raytracing_Raymarching_Hybrid main.cpp Raytracing.cpp Raytracing.h)
