@@ -122,17 +122,17 @@ namespace polygon {
 		vec3 A, B, C;
 
 		// Returns the normal of the trigon.
-		inline vec3 get_normal() { return normalize((B-A)*(C-A)); }
+		inline vec3 get_normal() const { return normalize((B-A)*(C-A)); }
 
 		// Generates the plane coefficients.
-		inline plane get_plane(vec3 normal) {
+		inline plane get_plane(vec3 normal) const {
 			const scalar a = normal.x;
 			const scalar b = normal.y;
 			const scalar c = normal.z;
 			const scalar d = (-1)*(a*A.x + b*A.y + c*A.z);
 			return {a, b, c, d};
 		}
-		inline plane get_plane() { return get_plane(get_normal()); }
+		inline plane get_plane() const { return get_plane(get_normal()); }
 	};
 }
 
