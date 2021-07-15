@@ -115,7 +115,6 @@ int main() {
 
 	fclose(fp);
 
-	double total_t = (double)(stop - start) / CLOCKS_PER_SEC;
 	printf("\nFinished writing it to a file!");
-	printf("\n\nrendering took %.3f seconds!\n", total_t);
+	printf("\n\nrendering took %.3f seconds!\n", (double)(stop - start) / CLOCKS_PER_SEC);
 }

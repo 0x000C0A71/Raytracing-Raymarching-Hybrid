@@ -8,16 +8,8 @@
 #include "fast_inverse_square_root.h"
 
 
-
-//   ____            _        _______
-//  |  _ \          (_)      |__   __|
-//  | |_) | __ _ ___ _  ___     | |_   _ _ __   ___  ___
-//  |  _ < / _` / __| |/ __|    | | | | | '_ \ / _ \/ __|
-//  | |_) | (_| \__ \ | (__     | | |_| | |_) |  __/\__ \
-//  |____/ \__,_|___/_|\___|    |_|\__, | .__/ \___||___/
-//                                  __/ | |
-//                                 |___/|_|
-
+#define max(a, b) ((a) > (b) ? (a) : (b))
+#define min(a, b) ((a) > (b) ? (b) : (a))
 
 
 // Changing this changes the type for the scalar.
@@ -99,41 +91,5 @@ struct ray {
 	vec3 origin;
 	vec3 direction;
 };
-
-//   _____      _
-//  |  __ \    | |
-//  | |__) |__ | |_   _  __ _  ___  _ __
-//  |  ___/ _ \| | | | |/ _` |/ _ \| '_ \
-//  | |  | (_) | | |_| | (_| | (_) | | | |
-//  |_|   \___/|_|\__, |\__, |\___/|_| |_|
-//                 __/ | __/ |
-//                |___/ |___/
-
-// TODO: Think about whether or not to split this entire section into a separate file.
-
-namespace polygon {
-	struct plane {
-		// A plane is defined as follows: ax + by + cz + d = 0
-		scalar a, b, c, d;
-	};
-
-	struct trigon {
-		// A, B & C are the 3 corners of the trigon
-		vec3 A, B, C;
-
-		// Returns the normal of the trigon.
-		inline vec3 get_normal() const { return normalize((B-A)*(C-A)); }
-
-		// Generates the plane coefficients.
-		inline plane get_plane(vec3 normal) const {
-			const scalar a = normal.x;
-			const scalar b = normal.y;
-			const scalar c = normal.z;
-			const scalar d = (-1)*(a*A.x + b*A.y + c*A.z);
-			return {a, b, c, d};
-		}
-		inline plane get_plane() const { return get_plane(get_normal()); }
-	};
-}
 
 #endif //RAYTRACING_RAYMARCHING_HYBRID_TYPES_H
