@@ -6,6 +6,7 @@
 #define RAYTRACING_RAYMARCHING_HYBRID_RAYTRACING_H
 
 #include "Types.h"
+#include <cmath>
 
 namespace polygon {
 	struct plane {
@@ -32,28 +33,6 @@ namespace polygon {
 	};
 
 
-
-
-	bool ray_plane_intersection(ray R, plane L, vec3 *poi, scalar *alpha);
-	bool point_on_trigon(trigon tri, vec3 I, vec3* K);
-
-	inline void gen2DPlaneTrough2Points(scalar x1, scalar y1, scalar x2, scalar y2, scalar* a, scalar* b, scalar* c) {
-		const scalar x1d = x1;
-		const scalar y1d = y1;
-		const scalar x2d = -y2;
-		const scalar y2d = x2;
-
-
-
-		*c = x1d*x2d + y1d*y2d; // This might lead to inaccuracies in the future.
-		if (*c == 0) {
-			// May god help me
-			// TODO: Pray to god for his help is needed in this case
-		} else {
-			*b = (x1 - x2)/(x2*y1 - x1*y2) * *c; // Painful division
-			*a = (y1 - y2)/(x1*y2 - x2*y1) * *c; // Painful division pt.2
-		}
-	}
 
 	struct Box {
 		// The two corners of the box
@@ -83,46 +62,63 @@ namespace polygon {
 			const bool nearest_point_in_box = point_in_box(nearest_point);
 			if (nearest_point_in_box) { return true; }
 
-			// up to here that's 100 instructions
-			// (div can take ~24 cycles)
-
 			// Now onto the most expensive case
+			const scalar x1 = A.x;
+			const scalar y1 = A.y;
+			const scalar z1 = A.z;
+			const scalar x2 = B.x;
+			const scalar y2 = B.y;
+			const scalar z2 = B.z;
 
-			// I made this entire monstrosity to avoid divisions. Having a look at it in compiler explorer makes it
-			// obvious, that it is not worth it at all (like really not worth it).
-			// TODO: Make a simpler plane intersection for axis aligned planes cause that will be way way way faster
-			plane P{};
-			vec3 poi{};
-			scalar alpha;
+			const scalar dx1 = x1 - r.origin.x;
+			const scalar dy1 = y1 - r.origin.y;
+			const scalar dz1 = z1 - r.origin.z;
+			const scalar dx2 = x2 - r.origin.x;
+			const scalar dy2 = y2 - r.origin.y;
+			const scalar dz2 = z2 - r.origin.z;
 
-			P.c = 0;
-			gen2DPlaneTrough2Points(A.x, A.y, B.x, B.y, &P.a, &P.b, &P.d);
-			if (ray_plane_intersection(r, P, &poi, &alpha)) {
-				if (point_in_box(poi)) { return true; }
-			}
-			gen2DPlaneTrough2Points(A.x, B.y, B.x, A.y, &P.a, &P.b, &P.d);
-			if (ray_plane_intersection(r, P, &poi, &alpha)) {
-				if (point_in_box(poi)) { return true; }
-			}
+			const scalar fx1 = dx1/r.direction.x; // might be inf
+			const scalar fy1 = dy1/r.direction.y; // might be inf
+			const scalar fz1 = dz1/r.direction.z; // might be inf
+			const scalar fx2 = dx2/r.direction.x; // might be inf
+			const scalar fy2 = dy2/r.direction.y; // might be inf
+			const scalar fz2 = dz2/r.direction.z; // might be inf
 
-			P.a = 0;
-			gen2DPlaneTrough2Points(A.y, A.z, B.y, B.z, &P.b, &P.c, &P.d);
-			if (ray_plane_intersection(r, P, &poi, &alpha)) {
-				if (point_in_box(poi)) { return true; }
+			if ((fx1 > 0) && (fx1 < INFINITY)) {
+				const vec3 point = r.origin + (r.direction*fx1);
+				const bool check_1 = (max(A.y, B.y) >= point.y) && (min(A.y, B.y) <= point.y);
+				const bool check_2 = (max(A.z, B.z) >= point.z) && (min(A.z, B.z) <= point.z);
+				if (check_1 && check_2) { return true; }
 			}
-			gen2DPlaneTrough2Points(A.y, B.z, B.y, A.z, &P.b, &P.c, &P.d);
-			if (ray_plane_intersection(r, P, &poi, &alpha)) {
-				if (point_in_box(poi)) { return true; }
+			if ((fy1 > 0) && (fy1 < INFINITY)) {
+				const vec3 point = r.origin + (r.direction*fy1);
+				const bool check_1 = (max(A.z, B.z) >= point.z) && (min(A.z, B.z) <= point.z);
+				const bool check_2 = (max(A.x, B.x) >= point.x) && (min(A.x, B.x) <= point.x);
+				if (check_1 && check_2) { return true; }
 			}
-
-			P.b = 0;
-			gen2DPlaneTrough2Points(A.z, A.x, B.z, B.x, &P.c, &P.a, &P.d);
-			if (ray_plane_intersection(r, P, &poi, &alpha)) {
-				if (point_in_box(poi)) { return true; }
+			if ((fz1 > 0) && (fz1 < INFINITY)) {
+				const vec3 point = r.origin + (r.direction*fz1);
+				const bool check_1 = (max(A.x, B.x) >= point.x) && (min(A.x, B.x) <= point.x);
+				const bool check_2 = (max(A.y, B.y) >= point.y) && (min(A.y, B.y) <= point.y);
+				if (check_1 && check_2) { return true; }
 			}
-			gen2DPlaneTrough2Points(A.z, B.x, B.z, A.x, &P.c, &P.a, &P.d);
-			if (ray_plane_intersection(r, P, &poi, &alpha)) {
-				if (point_in_box(poi)) { return true; }
+			if ((fx2 > 0) && (fx2 < INFINITY)) {
+				const vec3 point = r.origin + (r.direction*fx2);
+				const bool check_1 = (max(A.y, B.y) >= point.y) && (min(A.y, B.y) <= point.y);
+				const bool check_2 = (max(A.z, B.z) >= point.z) && (min(A.z, B.z) <= point.z);
+				if (check_1 && check_2) { return true; }
+			}
+			if ((fy2 > 0) && (fy2 < INFINITY)) {
+				const vec3 point = r.origin + (r.direction*fy2);
+				const bool check_1 = (max(A.z, B.z) >= point.z) && (min(A.z, B.z) <= point.z);
+				const bool check_2 = (max(A.x, B.x) >= point.x) && (min(A.x, B.x) <= point.x);
+				if (check_1 && check_2) { return true; }
+			}
+			if ((fz2 > 0) && (fz2 < INFINITY)) {
+				const vec3 point = r.origin + (r.direction*fz2);
+				const bool check_1 = (max(A.x, B.x) >= point.x) && (min(A.x, B.x) <= point.x);
+				const bool check_2 = (max(A.y, B.y) >= point.y) && (min(A.y, B.y) <= point.y);
+				if (check_1 && check_2) { return true; }
 			}
 
 
@@ -131,5 +127,10 @@ namespace polygon {
 			return false;
 		}
 	};
+
+
+	bool ray_plane_intersection(ray R, plane L, vec3 *poi, scalar *alpha);
+	bool point_on_trigon(trigon tri, vec3 I, vec3* K);
+
 }
 #endif //RAYTRACING_RAYMARCHING_HYBRID_RAYTRACING_H
