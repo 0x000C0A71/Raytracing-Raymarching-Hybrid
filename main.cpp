@@ -1,10 +1,10 @@
 
 // This file is currently used to test the stuff I add, so it will not contain anything smart
 
-#include <stdio.h>
+#include <cstdio>
 #include "Types.h"
 #include "Raytracing.h"
-#include <time.h>
+#include <ctime>
 
 using namespace polygon;
 
@@ -20,7 +20,7 @@ const int headerSize = 14;
 const int DIBSize = 40;
 const int pixelsSize = width*height*3;
 
-col pixels[width*height];
+col* pixels;
 
 FILE *fp;
 
@@ -63,6 +63,7 @@ void dumpPixels(col* px, int num) {
 	}
 }
 int main() {
+	pixels = new col[width*height];
 	printf("starting render...");
 	clock_t start, stop;
 	start = clock();

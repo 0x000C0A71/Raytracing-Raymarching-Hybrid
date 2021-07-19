@@ -6,7 +6,6 @@
 #define RAYTRACING_RAYMARCHING_HYBRID_RAYTRACING_H
 
 #include "Types.h"
-#include <cmath>
 
 namespace polygon {
 	struct plane {
@@ -33,7 +32,6 @@ namespace polygon {
 	};
 
 
-
 	struct Box {
 		// The two corners of the box
 		vec3 A, B;
@@ -50,85 +48,39 @@ namespace polygon {
 			return check_x && check_y && check_z;
 		}
 
-		bool intersect_ray(ray r) const {
-			// Easiest case
-			const bool origin_in_box = point_in_box(r.origin);
-			if (origin_in_box) {return true;}
-
-			// Next easier case
-			const vec3 midpoint = (A+B)*0.5;
-			const vec3 vec_to_mid = midpoint - r.origin;
-			const vec3 nearest_point = r.direction*(vec_to_mid^r.direction) + r.origin;
-			const bool nearest_point_in_box = point_in_box(nearest_point);
-			if (nearest_point_in_box) { return true; }
-
-			// Now onto the most expensive case
-			const scalar x1 = A.x;
-			const scalar y1 = A.y;
-			const scalar z1 = A.z;
-			const scalar x2 = B.x;
-			const scalar y2 = B.y;
-			const scalar z2 = B.z;
-
-			const scalar dx1 = x1 - r.origin.x;
-			const scalar dy1 = y1 - r.origin.y;
-			const scalar dz1 = z1 - r.origin.z;
-			const scalar dx2 = x2 - r.origin.x;
-			const scalar dy2 = y2 - r.origin.y;
-			const scalar dz2 = z2 - r.origin.z;
-
-			const scalar fx1 = dx1/r.direction.x; // might be inf
-			const scalar fy1 = dy1/r.direction.y; // might be inf
-			const scalar fz1 = dz1/r.direction.z; // might be inf
-			const scalar fx2 = dx2/r.direction.x; // might be inf
-			const scalar fy2 = dy2/r.direction.y; // might be inf
-			const scalar fz2 = dz2/r.direction.z; // might be inf
-
-			if ((fx1 > 0) && (fx1 < INFINITY)) {
-				const vec3 point = r.origin + (r.direction*fx1);
-				const bool check_1 = (max(A.y, B.y) >= point.y) && (min(A.y, B.y) <= point.y);
-				const bool check_2 = (max(A.z, B.z) >= point.z) && (min(A.z, B.z) <= point.z);
-				if (check_1 && check_2) { return true; }
-			}
-			if ((fy1 > 0) && (fy1 < INFINITY)) {
-				const vec3 point = r.origin + (r.direction*fy1);
-				const bool check_1 = (max(A.z, B.z) >= point.z) && (min(A.z, B.z) <= point.z);
-				const bool check_2 = (max(A.x, B.x) >= point.x) && (min(A.x, B.x) <= point.x);
-				if (check_1 && check_2) { return true; }
-			}
-			if ((fz1 > 0) && (fz1 < INFINITY)) {
-				const vec3 point = r.origin + (r.direction*fz1);
-				const bool check_1 = (max(A.x, B.x) >= point.x) && (min(A.x, B.x) <= point.x);
-				const bool check_2 = (max(A.y, B.y) >= point.y) && (min(A.y, B.y) <= point.y);
-				if (check_1 && check_2) { return true; }
-			}
-			if ((fx2 > 0) && (fx2 < INFINITY)) {
-				const vec3 point = r.origin + (r.direction*fx2);
-				const bool check_1 = (max(A.y, B.y) >= point.y) && (min(A.y, B.y) <= point.y);
-				const bool check_2 = (max(A.z, B.z) >= point.z) && (min(A.z, B.z) <= point.z);
-				if (check_1 && check_2) { return true; }
-			}
-			if ((fy2 > 0) && (fy2 < INFINITY)) {
-				const vec3 point = r.origin + (r.direction*fy2);
-				const bool check_1 = (max(A.z, B.z) >= point.z) && (min(A.z, B.z) <= point.z);
-				const bool check_2 = (max(A.x, B.x) >= point.x) && (min(A.x, B.x) <= point.x);
-				if (check_1 && check_2) { return true; }
-			}
-			if ((fz2 > 0) && (fz2 < INFINITY)) {
-				const vec3 point = r.origin + (r.direction*fz2);
-				const bool check_1 = (max(A.x, B.x) >= point.x) && (min(A.x, B.x) <= point.x);
-				const bool check_2 = (max(A.y, B.y) >= point.y) && (min(A.y, B.y) <= point.y);
-				if (check_1 && check_2) { return true; }
-			}
-
-
-
-			// It appears like it didn't intersect
-			return false;
-		}
+		bool intersect_ray(ray r) const;
 	};
 
 
+	struct ref_trigon { int index_A, index_B, index_C; };
+
+	struct Mesh {
+		vec3* verts;
+		int number_of_verts;
+		ref_trigon* tris;
+		int number_of_tris;
+
+		inline trigon get_derefed_tri(int index) const {
+			const ref_trigon rt = tris[index];
+			const vec3 A = verts[rt.index_A];
+			const vec3 B = verts[rt.index_B];
+			const vec3 C = verts[rt.index_C];
+			return {A, B, C};
+		}
+
+		Box get_bounding_box() const;
+		bool intersect_ray(ray r, vec3* poi, scalar* alpha) const;
+	};
+
+	struct Object {
+		// I should do transformations here aswell, but I can't be bothered right now.
+		Mesh mesh;
+		Box bounding_box;
+
+		inline void load_bounding_box() { bounding_box = mesh.get_bounding_box(); }
+	};
+
+	// TODO: Make these member functions of the repsective types.
 	bool ray_plane_intersection(ray R, plane L, vec3 *poi, scalar *alpha);
 	bool point_on_trigon(trigon tri, vec3 I, vec3* K);
 

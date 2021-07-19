@@ -4,6 +4,9 @@
 
 #include "Raytracing.h"
 
+// TODO: Make this type agnostic. Right now this is the infinity value for floats, and not for doubles.
+# define INFINITY        (__builtin_inff())
+
 namespace polygon {
 	bool ray_plane_intersection(ray R, plane L, vec3 *poi, scalar *alpha) {
 		const scalar a = L.a;
@@ -53,5 +56,133 @@ namespace polygon {
 		K->y = bDist*fac;
 		K->z = cDist*fac;
 		return true;
+	}
+
+	bool Box::intersect_ray(ray r) const {
+		// Easiest case
+		const bool origin_in_box = point_in_box(r.origin);
+		if (origin_in_box) {return true;}
+
+		// Next easier case
+		const vec3 midpoint = (A+B)*0.5;
+		const vec3 vec_to_mid = midpoint - r.origin;
+		const vec3 nearest_point = r.direction*(vec_to_mid^r.direction) + r.origin;
+		const bool nearest_point_in_box = point_in_box(nearest_point);
+		if (nearest_point_in_box) { return true; }
+
+		// Now onto the most expensive case
+		const scalar x1 = A.x;
+		const scalar y1 = A.y;
+		const scalar z1 = A.z;
+		const scalar x2 = B.x;
+		const scalar y2 = B.y;
+		const scalar z2 = B.z;
+
+		const scalar dx1 = x1 - r.origin.x;
+		const scalar dy1 = y1 - r.origin.y;
+		const scalar dz1 = z1 - r.origin.z;
+		const scalar dx2 = x2 - r.origin.x;
+		const scalar dy2 = y2 - r.origin.y;
+		const scalar dz2 = z2 - r.origin.z;
+
+		const scalar fx1 = dx1/r.direction.x; // might be inf
+		const scalar fy1 = dy1/r.direction.y; // might be inf
+		const scalar fz1 = dz1/r.direction.z; // might be inf
+		const scalar fx2 = dx2/r.direction.x; // might be inf
+		const scalar fy2 = dy2/r.direction.y; // might be inf
+		const scalar fz2 = dz2/r.direction.z; // might be inf
+
+		if ((fx1 > 0) && (fx1 < INFINITY)) {
+			const vec3 point = r.origin + (r.direction*fx1);
+			const bool check_1 = (max(A.y, B.y) >= point.y) && (min(A.y, B.y) <= point.y);
+			const bool check_2 = (max(A.z, B.z) >= point.z) && (min(A.z, B.z) <= point.z);
+			if (check_1 && check_2) { return true; }
+		}
+		if ((fy1 > 0) && (fy1 < INFINITY)) {
+			const vec3 point = r.origin + (r.direction*fy1);
+			const bool check_1 = (max(A.z, B.z) >= point.z) && (min(A.z, B.z) <= point.z);
+			const bool check_2 = (max(A.x, B.x) >= point.x) && (min(A.x, B.x) <= point.x);
+			if (check_1 && check_2) { return true; }
+		}
+		if ((fz1 > 0) && (fz1 < INFINITY)) {
+			const vec3 point = r.origin + (r.direction*fz1);
+			const bool check_1 = (max(A.x, B.x) >= point.x) && (min(A.x, B.x) <= point.x);
+			const bool check_2 = (max(A.y, B.y) >= point.y) && (min(A.y, B.y) <= point.y);
+			if (check_1 && check_2) { return true; }
+		}
+		if ((fx2 > 0) && (fx2 < INFINITY)) {
+			const vec3 point = r.origin + (r.direction*fx2);
+			const bool check_1 = (max(A.y, B.y) >= point.y) && (min(A.y, B.y) <= point.y);
+			const bool check_2 = (max(A.z, B.z) >= point.z) && (min(A.z, B.z) <= point.z);
+			if (check_1 && check_2) { return true; }
+		}
+		if ((fy2 > 0) && (fy2 < INFINITY)) {
+			const vec3 point = r.origin + (r.direction*fy2);
+			const bool check_1 = (max(A.z, B.z) >= point.z) && (min(A.z, B.z) <= point.z);
+			const bool check_2 = (max(A.x, B.x) >= point.x) && (min(A.x, B.x) <= point.x);
+			if (check_1 && check_2) { return true; }
+		}
+		if ((fz2 > 0) && (fz2 < INFINITY)) {
+			const vec3 point = r.origin + (r.direction*fz2);
+			const bool check_1 = (max(A.x, B.x) >= point.x) && (min(A.x, B.x) <= point.x);
+			const bool check_2 = (max(A.y, B.y) >= point.y) && (min(A.y, B.y) <= point.y);
+			if (check_1 && check_2) { return true; }
+		}
+
+
+
+		// It appears like it didn't intersect
+		return false;
+	}
+
+	Box Mesh::get_bounding_box() const {
+		scalar x1, x2;
+		scalar y1, y2;
+		scalar z1, z2;
+		for (int i = 0; i < number_of_verts; i++) {
+			const vec3 vert = verts[i];
+			x1 = min(x1, vert.x);
+			y1 = min(y1, vert.y);
+			z1 = min(z1, vert.z);
+			x2 = max(x2, vert.x);
+			y2 = max(y2, vert.y);
+			z2 = max(z2, vert.z);
+		}
+		return {{x1, y1, z1}, {x2, y2, z2}};
+	}
+
+	bool Mesh::intersect_ray(ray r, vec3* poi, scalar* alpha) const {
+		// Ouch!!
+
+		bool did_hit = false;
+
+		vec3 best_point{};
+		scalar best_alpha = INFINITY;
+		vec3 best_K{};
+		int best_index;
+
+		for (int current_index = 0; current_index < number_of_tris; current_index++) {
+			// Very expensive for loop
+
+			const trigon tri = get_derefed_tri(current_index);
+
+			vec3 current_point{};
+			scalar current_alpha;
+			vec3 current_K{};
+
+			if (!ray_plane_intersection(r, tri.get_plane(), &current_point, &current_alpha)) { continue; }
+			if (!point_on_trigon(tri, current_point, &current_K)) {  continue; }
+
+			did_hit = true;
+
+			if (current_alpha < best_alpha) {
+				best_point = current_point;
+				best_alpha = current_alpha;
+				best_K = current_K;
+				best_index = current_index;
+			}
+		}
+
+		return did_hit;
 	}
 }

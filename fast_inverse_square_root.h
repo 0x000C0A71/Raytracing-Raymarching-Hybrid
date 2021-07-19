@@ -5,8 +5,6 @@
 #ifndef RAYTRACING_RAYMARCHING_HYBRID_FAST_INVERSE_SQUARE_ROOT_H
 #define RAYTRACING_RAYMARCHING_HYBRID_FAST_INVERSE_SQUARE_ROOT_H
 
-#include <iostream>
-
 // This has been copied out of quake 3 arena
 inline
 float Q_rsqrt( float number )
