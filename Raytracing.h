@@ -7,6 +7,19 @@
 
 #include "Types.h"
 
+// Infinities
+inline double inf(double probe) {
+	const unsigned long long k = 0x7FF0000000000000;
+	return *(double*)(&k);
+}
+
+inline float inf(float probe) {
+	const unsigned long int k = 0x7F800000;
+	return *(float*)(&k);
+}
+
+#define INFINITY (inf((scalar)1))
+
 namespace polygon {
 	struct plane {
 		// A plane is defined as follows: ax + by + cz + d = 0

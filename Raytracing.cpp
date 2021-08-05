@@ -4,8 +4,6 @@
 
 #include "Raytracing.h"
 
-// TODO: Make this type agnostic. Right now this is the infinity value for floats, and not for doubles.
-# define INFINITY        (__builtin_inff())
 
 namespace polygon {
 	bool ray_plane_intersection(ray R, plane L, vec3 *poi, scalar *alpha) {

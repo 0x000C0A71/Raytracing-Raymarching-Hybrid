@@ -5,6 +5,7 @@
 #include "Types.h"
 #include "Raytracing.h"
 #include <ctime>
+#include <string.h>
 
 using namespace polygon;
 
@@ -64,6 +65,9 @@ void dumpPixels(col* px, int num) {
 }
 int main() {
 	pixels = new col[width*height];
+
+	memset(pixels, 0, width*height*3); // This line could technically be ommitted
+
 	printf("starting render...");
 	clock_t start, stop;
 	start = clock();
@@ -97,7 +101,7 @@ int main() {
 	printf("\nBeginning writing it to a file (with my dodgey bitmap exporter)...");
 
 
-	fp = fopen("test.bmp", "w");
+	fp = fopen("test.bmp", "wb");
 
 	fputc('B', fp);
 	fputc('M', fp);
