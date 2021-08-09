@@ -1,5 +1,5 @@
 //
-// Created by xerne on 07/07/2021.
+// Created by marc on 07/07/2021.
 //
 
 #ifndef RAYTRACING_RAYMARCHING_HYBRID_FAST_INVERSE_SQUARE_ROOT_H

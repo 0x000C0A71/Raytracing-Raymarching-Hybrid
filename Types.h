@@ -1,5 +1,5 @@
 //
-// Created by xerne on 07/07/2021.
+// Created by marc on 07/07/2021.
 //
 
 #ifndef RAYTRACING_RAYMARCHING_HYBRID_TYPES_H
@@ -22,9 +22,9 @@ struct vec3 {
 
 	inline vec3 operator+(vec3 other) const {
 		return {
-			x + other.x,
-			y + other.y,
-			z + other.z,
+				x + other.x,
+				y + other.y,
+				z + other.z,
 		};
 	}
 
@@ -39,9 +39,9 @@ struct vec3 {
 	// Scaling a vector by a scalar
 	inline vec3 operator*(scalar factor) const {
 		return {
-				x * factor,
-				y * factor,
-				z * factor,
+				x*factor,
+				y*factor,
+				z*factor,
 		};
 	}
 
@@ -66,9 +66,9 @@ struct vec3 {
 // Linearly interpolates between vector a & b.
 inline vec3 lerp(vec3 a, vec3 b, scalar t) {
 	return {
-		(1-t)*a.x + t*b.x,
-		(1-t)*a.y + t*b.y,
-		(1-t)*a.z + t*b.z,
+			(1 - t)*a.x + t*b.x,
+			(1 - t)*a.y + t*b.y,
+			(1 - t)*a.z + t*b.z,
 	};
 }
 

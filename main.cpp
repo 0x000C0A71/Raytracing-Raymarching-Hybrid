@@ -1,11 +1,11 @@
 
 // This file is currently used to test the stuff I add, so it will not contain anything smart
 
-#include <cstdio>
 #include "Types.h"
 #include "Raytracing.h"
+#include <cstdio>
 #include <ctime>
-#include <string.h>
+#include <cstring>
 
 using namespace polygon;
 
@@ -23,25 +23,24 @@ const int pixelsSize = width*height*3;
 
 col* pixels;
 
-FILE *fp;
+FILE* fp;
 
 
-
-void printInt(int v) {
-	char* cp = (char*)(&v);
+inline void printInt(int v) {
+	char* cp = (char*) (&v);
 	fputc(*(cp + 0), fp);
 	fputc(*(cp + 1), fp);
 	fputc(*(cp + 2), fp);
 	fputc(*(cp + 3), fp);
 }
 
-void printInt16(int v) {
-	char* cp = (char*)(&v);
+inline void printInt16(int v) {
+	char* cp = (char*) (&v);
 	fputc(*(cp + 0), fp);
 	fputc(*(cp + 1), fp);
 }
 
-void printBIH() {
+inline void printBIH() {
 	printInt(DIBSize);
 	printInt(width);
 	printInt(height);
@@ -55,7 +54,7 @@ void printBIH() {
 	printInt(0);
 }
 
-void dumpPixels(col* px, int num) {
+inline void dumpPixels(col* px, int num) {
 	for (int i = 0; i < num; i++) {
 		col pix = px[i];
 		fputc(pix.b, fp);
@@ -63,35 +62,57 @@ void dumpPixels(col* px, int num) {
 		fputc(pix.r, fp);
 	}
 }
+
 int main() {
 	pixels = new col[width*height];
 
-	memset(pixels, 0, width*height*3); // This line could technically be ommitted
+	memset(pixels, 0, width*height*3); // This line could technically be omitted
 
 	printf("starting render...");
 	clock_t start, stop;
 	start = clock();
 
-	const trigon t = {{1, 0, -0.75}, {1, 0.866025, 0.75}, {1, -0.866025, 0.75}};
-	ray r = {{0, 0, 0}, {0, 0, 1}};
-	const plane a = t.get_plane();
+	// Setting up the ray
+	ray r = {{-2.5, 0, 0},
+	         {0,    0, 1}};
 
-	vec3 total = {0, 0, 0};
+	// The list of vertices
+	vec3 verts[] = {
+			{1,  1,  1},
+			{1,  1,  -1},
+			{1,  -1, 1},
+			{1,  -1, -1},
+			{-1, 1,  1},
+			{-1, 1,  -1},
+			{-1, -1, 1},
+			{-1, -1, -1}
+	};
+
+	// The list of Trigons
+	ref_trigon tris[] = {
+			{1, 5, 7},
+			{1, 7, 3},
+			{0, 1, 3},
+			{0, 3, 2},
+			{4, 0, 2},
+			{4, 2, 6}
+	};
+
+	// Composing the Object
+	Object obj = {{verts, 8, tris, 6}};
+	obj.load_bounding_box();
+
 
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
-			r.origin = {-0, 0, 0};
-			r.direction = {1, ((float)x)/width*2-1, ((float)y)/height*2-1};
+			r.direction = {1, ((float) x)/width*2 - 1, ((float) y)/height*2 - 1};
 
-			vec3 i;
-			scalar bl;
-			if (ray_plane_intersection(r, a, &i, &bl)) {
-
-				vec3 c;
-				if (point_on_trigon(t, i, &c)) {
-					col cc = {(char)(c.x*255), (char)(c.y*255), (char)(c.z*255)};
-					pixels[y*width+x] = cc;
-				}
+			vec3 poi{};
+			scalar alpha;
+			vec3 K{};
+			if (obj.intersect_ray(r, &poi, &alpha, &K)) {
+				col cc = {(char) (K.x*255), (char) (K.y*255), (char) (K.z*255)};
+				pixels[y*width + x] = cc;
 			}
 		}
 	}
@@ -121,5 +142,5 @@ int main() {
 	fclose(fp);
 
 	printf("\nFinished writing it to a file!");
-	printf("\n\nrendering took %.3f seconds!\n", (double)(stop - start) / CLOCKS_PER_SEC);
+	printf("\n\nrendering took %.3f seconds!\n", (double) (stop - start)/CLOCKS_PER_SEC);
 }

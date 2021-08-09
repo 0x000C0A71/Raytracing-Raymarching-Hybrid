@@ -6,13 +6,13 @@
 
 
 namespace polygon {
-	bool ray_plane_intersection(ray R, plane L, vec3 *poi, scalar *alpha) {
+	bool ray_plane_intersection(ray R, plane L, vec3* poi, scalar* alpha) {
 		const scalar a = L.a;
 		const scalar b = L.b;
 		const scalar c = L.c;
 		const scalar d = L.d;
-		const vec3   C = R.origin;
-		const vec3   P = R.direction;
+		const vec3 C = R.origin;
+		const vec3 P = R.direction;
 
 		const scalar N = a*P.x + b*P.y + c*P.z;
 
@@ -20,8 +20,8 @@ namespace polygon {
 
 		const scalar Z = a*C.x + b*C.y + c*C.z + d;
 
-		const scalar t = -(Z / N); // Painful division
-		// TODO: make sure this painful division is really necesarry
+		const scalar t = -(Z/N); // Painful division
+		// TODO: make sure this painful division is really necessary
 
 		const vec3 i = C + (P*t);
 
@@ -31,7 +31,7 @@ namespace polygon {
 	}
 
 	bool point_on_trigon(trigon tri, vec3 I, vec3* K) {
-		const vec3  Normal = tri.get_normal(); // TODO: this can be used as an input and we can save 1 call to this function like that.
+		const vec3 Normal = tri.get_normal(); // TODO: this can be used as an input and we can save 1 call to this function like that.
 		const vec3 aNormal = (tri.B - tri.C)*Normal;
 		const vec3 bNormal = (tri.C - tri.A)*Normal;
 		const vec3 cNormal = (tri.A - tri.B)*Normal;
@@ -39,9 +39,9 @@ namespace polygon {
 		const vec3 vai = I - tri.A;
 		const vec3 vbi = I - tri.B;
 
-		const scalar aDist = (vbi^aNormal) * Q_rsqrt(sqLength(aNormal));
-		const scalar bDist = (vai^bNormal) * Q_rsqrt(sqLength(bNormal));
-		const scalar cDist = (vai^cNormal) * Q_rsqrt(sqLength(cNormal));
+		const scalar aDist = (vbi^aNormal)*Q_rsqrt(sqLength(aNormal));
+		const scalar bDist = (vai^bNormal)*Q_rsqrt(sqLength(bNormal));
+		const scalar cDist = (vai^cNormal)*Q_rsqrt(sqLength(cNormal));
 
 		if ((aDist < 0) || (bDist < 0) || (cDist < 0)) return false;
 
@@ -59,10 +59,10 @@ namespace polygon {
 	bool Box::intersect_ray(ray r) const {
 		// Easiest case
 		const bool origin_in_box = point_in_box(r.origin);
-		if (origin_in_box) {return true;}
+		if (origin_in_box) return true;
 
 		// Next easier case
-		const vec3 midpoint = (A+B)*0.5;
+		const vec3 midpoint = (A + B)*0.5;
 		const vec3 vec_to_mid = midpoint - r.origin;
 		const vec3 nearest_point = r.direction*(vec_to_mid^r.direction) + r.origin;
 		const bool nearest_point_in_box = point_in_box(nearest_point);
@@ -146,10 +146,11 @@ namespace polygon {
 			y2 = max(y2, vert.y);
 			z2 = max(z2, vert.z);
 		}
-		return {{x1, y1, z1}, {x2, y2, z2}};
+		return {{x1, y1, z1},
+		        {x2, y2, z2}};
 	}
 
-	bool Mesh::intersect_ray(ray r, vec3* poi, scalar* alpha) const {
+	bool Mesh::intersect_ray(ray r, vec3* poi, scalar* alpha, int* trigon_index, vec3* K) const {
 		// Ouch!!
 
 		bool did_hit = false;
@@ -168,8 +169,8 @@ namespace polygon {
 			scalar current_alpha;
 			vec3 current_K{};
 
-			if (!ray_plane_intersection(r, tri.get_plane(), &current_point, &current_alpha)) { continue; }
-			if (!point_on_trigon(tri, current_point, &current_K)) {  continue; }
+			if (!ray_plane_intersection(r, tri.get_plane(), &current_point, &current_alpha)) continue; // TODO: Cache the plane
+			if (!point_on_trigon(tri, current_point, &current_K)) continue;
 
 			did_hit = true;
 
@@ -181,6 +182,21 @@ namespace polygon {
 			}
 		}
 
+		*poi = best_point;
+		*alpha = best_alpha;
+		*K = best_K;
+		*trigon_index = best_index;
+
 		return did_hit;
+	}
+
+	bool Object::intersect_ray(ray r, vec3* poi, scalar* alpha, vec3* K) const {
+		const bool did_hit_box = bounding_box.intersect_ray(r);
+		if (!did_hit_box) return false;
+
+
+		int trigon_index;
+		const bool did_hit_mesh = mesh.intersect_ray(r, poi, alpha, &trigon_index, K);
+		return did_hit_mesh;
 	}
 }

@@ -10,12 +10,12 @@
 // Infinities
 inline double inf(double probe) {
 	const unsigned long long k = 0x7FF0000000000000;
-	return *(double*)(&k);
+	return *(double*) (&k);
 }
 
 inline float inf(float probe) {
 	const unsigned long int k = 0x7F800000;
-	return *(float*)(&k);
+	return *(float*) (&k);
 }
 
 #define INFINITY (inf((scalar)1))
@@ -31,7 +31,7 @@ namespace polygon {
 		vec3 A, B, C;
 
 		// Returns the normal of the trigon.
-		inline vec3 get_normal() const { return normalize((B-A)*(C-A)); }
+		inline vec3 get_normal() const { return normalize((B - A)*(C - A)); }
 
 		// Generates the plane coefficients.
 		inline plane get_plane(vec3 normal) const {
@@ -41,6 +41,7 @@ namespace polygon {
 			const scalar d = (-1)*(a*A.x + b*A.y + c*A.z);
 			return {a, b, c, d};
 		}
+
 		inline plane get_plane() const { return get_plane(get_normal()); }
 	};
 
@@ -65,7 +66,9 @@ namespace polygon {
 	};
 
 
-	struct ref_trigon { int index_A, index_B, index_C; };
+	struct ref_trigon {
+		int index_A, index_B, index_C;
+	};
 
 	struct Mesh {
 		vec3* verts;
@@ -82,7 +85,8 @@ namespace polygon {
 		}
 
 		Box get_bounding_box() const;
-		bool intersect_ray(ray r, vec3* poi, scalar* alpha) const;
+
+		bool intersect_ray(ray r, vec3* poi, scalar* alpha, int* trigon_index, vec3* K) const;
 	};
 
 	struct Object {
@@ -91,10 +95,13 @@ namespace polygon {
 		Box bounding_box;
 
 		inline void load_bounding_box() { bounding_box = mesh.get_bounding_box(); }
+
+		bool intersect_ray(ray r, vec3* poi, scalar* alpha, vec3* K) const; // TODO: The K argment is only temporary
 	};
 
-	// TODO: Make these member functions of the repsective types.
-	bool ray_plane_intersection(ray R, plane L, vec3 *poi, scalar *alpha);
+	// TODO: Make these member functions of the respective types.
+	bool ray_plane_intersection(ray R, plane L, vec3* poi, scalar* alpha);
+
 	bool point_on_trigon(trigon tri, vec3 I, vec3* K);
 
 }
