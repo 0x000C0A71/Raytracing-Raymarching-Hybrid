@@ -96,7 +96,10 @@ namespace polygon {
 
 		transform transform;
 
-		inline void load_bounding_box() { bounding_box = mesh.get_bounding_box(); }
+		inline void build() {
+			transform.build();
+			bounding_box = mesh.get_bounding_box();
+		}
 
 		bool intersect_ray(ray r, vec3* poi, scalar* alpha, vec3* K) const; // TODO: The K argment is only temporary
 	};

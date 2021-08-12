@@ -94,23 +94,87 @@ struct ray {
 };
 
 
+struct mat3 {
+	vec3 col_1, col_2, col_3;
+
+	inline vec3 operator*(vec3 v) const {
+		return col_1*v.x + col_2*v.y + col_3*v.z;
+	}
+
+	inline mat3 operator*(mat3 o) const {
+		return {operator*(o.col_1), operator*(o.col_2), operator*(o.col_3)};
+	}
+};
+
+
 struct rotator {
 	scalar roll, pitch, yaw;
 	// Disgusting gimbaled rotator!
 	// TODO: shift to quaternions or something like that
 
+	mat3 f_mat, b_mat; // Matrices that do the forward and backward rotations
+
+	inline void generate_matrices() {
+		// Doing the painful trig functions first and caching them in a rotation matrix
+
+		const scalar sin_r = sin(roll);
+		const scalar cos_r = cos(roll);
+		const scalar sin_p = sin(pitch);
+		const scalar cos_p = cos(pitch);
+		const scalar sin_y = sin(yaw);
+		const scalar cos_y = cos(yaw);
+		// TODO: use different trig functions, as these are not type agnostic (plus I hate having to use a library).
+
+		// forward matrices
+		const mat3 roll_f = {
+				{1, 0,      0},
+				{0, cos_r,  sin_r},
+				{0, -sin_r, cos_r}
+		};
+
+		const mat3 pitch_f = {
+				{cos_p, 0, -sin_p},
+				{0,     1, 0},
+				{sin_p, 0, cos_p}
+		};
+
+		const mat3 yaw_f = {
+				{cos_y,  sin_y, 0},
+				{-sin_y, cos_y, 0},
+				{0,      0,     1}
+		};
+
+		f_mat = yaw_f*pitch_f*roll_f;
+
+		// backward matrices
+		const mat3 roll_b = {
+				{1, 0,     0},
+				{0, cos_r, -sin_r},
+				{0, sin_r, cos_r}
+		};
+
+		const mat3 pitch_b = {
+				{cos_p,  0, sin_p},
+				{0,      1, 0},
+				{-sin_p, 0, cos_p}
+		};
+
+		const mat3 yaw_b = {
+				{cos_y, -sin_y, 0},
+				{sin_y, cos_y,  0},
+				{0,     0,      1}
+		};
+
+		b_mat = roll_b*pitch_b*yaw_b;
+
+	}
+
 	inline vec3 rotate(vec3 p) const {
-		const vec3 i1 = {p.x, cos(roll)*p.y + sin(roll)*p.z, cos(roll)*p.z - sin(roll)*p.y }; // These trig functions are expensive
-		const vec3 i2 = {cos(pitch)*i1.x + sin(pitch)*i1.z, i1.y, cos(pitch)*i1.z - sin(pitch)*i1.x }; // These trig functions are expensive
-		const vec3 i3 = {cos(yaw)*i2.x + sin(yaw)*i2.y, cos(yaw)*i2.y - sin(yaw)*i2.x, i2.z }; // These trig functions are expensive
-		return i3;
+		return f_mat*p;
 	}
 
 	inline vec3 derotate(vec3 p) const {
-		const vec3 i1 = {cos(yaw)*p.x + sin(-yaw)*p.y, cos(yaw)*p.y - sin(-yaw)*p.x, p.z }; // These trig functions are expensive
-		const vec3 i2 = {cos(pitch)*i1.x + sin(-pitch)*i1.z, i1.y, cos(pitch)*i1.z - sin(-pitch)*i1.x }; // These trig functions are expensive
-		const vec3 i3 = {i2.x, cos(roll)*i2.y + sin(-roll)*i2.z, cos(roll)*i2.z - sin(-roll)*i2.y }; // These trig functions are expensive
-		return i3;
+		return b_mat*p;
 	}
 };
 
@@ -118,6 +182,10 @@ struct transform {
 	vec3 translation;
 	rotator rotation;
 	// vec3 scale;
+
+	inline void build() {
+		rotation.generate_matrices();
+	}
 
 	inline vec3 apply(vec3 p) const {
 		const vec3 r = rotation.rotate(p);
