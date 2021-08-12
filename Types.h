@@ -6,6 +6,7 @@
 #define RAYTRACING_RAYMARCHING_HYBRID_TYPES_H
 
 #include "fast_inverse_square_root.h"
+#include <cmath> // TODO: Please remove this. I hate depending on libraries. It's my kryptonite
 
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
@@ -90,6 +91,57 @@ inline vec3 reflect(vec3 v, vec3 n) {
 struct ray {
 	vec3 origin;
 	vec3 direction;
+};
+
+
+struct rotator {
+	scalar roll, pitch, yaw;
+	// Disgusting gimbaled rotator!
+	// TODO: shift to quaternions or something like that
+
+	inline vec3 rotate(vec3 p) const {
+		const vec3 i1 = {p.x, cos(roll)*p.y + sin(roll)*p.z, cos(roll)*p.z - sin(roll)*p.y }; // These trig functions are expensive
+		const vec3 i2 = {cos(pitch)*i1.x + sin(pitch)*i1.z, i1.y, cos(pitch)*i1.z - sin(pitch)*i1.x }; // These trig functions are expensive
+		const vec3 i3 = {cos(yaw)*i2.x + sin(yaw)*i2.y, cos(yaw)*i2.y - sin(yaw)*i2.x, i2.z }; // These trig functions are expensive
+		return i3;
+	}
+
+	inline vec3 derotate(vec3 p) const {
+		const vec3 i1 = {cos(yaw)*p.x + sin(-yaw)*p.y, cos(yaw)*p.y - sin(-yaw)*p.x, p.z }; // These trig functions are expensive
+		const vec3 i2 = {cos(pitch)*i1.x + sin(-pitch)*i1.z, i1.y, cos(pitch)*i1.z - sin(-pitch)*i1.x }; // These trig functions are expensive
+		const vec3 i3 = {i2.x, cos(roll)*i2.y + sin(-roll)*i2.z, cos(roll)*i2.z - sin(-roll)*i2.y }; // These trig functions are expensive
+		return i3;
+	}
+};
+
+struct transform {
+	vec3 translation;
+	rotator rotation;
+	// vec3 scale;
+
+	inline vec3 apply(vec3 p) const {
+		const vec3 r = rotation.rotate(p);
+		const vec3 t = r + translation;
+		return t;
+	}
+
+	inline vec3 deapply(vec3 p) const {
+		const vec3 t = p - translation;
+		const vec3 r = rotation.derotate(t);
+		return r;
+	}
+
+	inline ray apply(ray r) const {
+		r.origin = apply(r.origin);
+		r.direction = rotation.rotate(r.direction);
+		return r;
+	}
+
+	inline ray deapply(ray r) const {
+		r.origin = deapply(r.origin);
+		r.direction = rotation.derotate(r.direction);
+		return r;
+	}
 };
 
 #endif //RAYTRACING_RAYMARCHING_HYBRID_TYPES_H

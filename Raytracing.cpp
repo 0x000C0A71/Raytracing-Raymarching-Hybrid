@@ -191,12 +191,17 @@ namespace polygon {
 	}
 
 	bool Object::intersect_ray(ray r, vec3* poi, scalar* alpha, vec3* K) const {
+		r = transform.deapply(r);
+
 		const bool did_hit_box = bounding_box.intersect_ray(r);
 		if (!did_hit_box) return false;
 
 
 		int trigon_index;
 		const bool did_hit_mesh = mesh.intersect_ray(r, poi, alpha, &trigon_index, K);
+
+		*poi = transform.deapply(*poi);
+
 		return did_hit_mesh;
 	}
 }

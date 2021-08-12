@@ -94,6 +94,8 @@ namespace polygon {
 		Mesh mesh;
 		Box bounding_box;
 
+		transform transform;
+
 		inline void load_bounding_box() { bounding_box = mesh.get_bounding_box(); }
 
 		bool intersect_ray(ray r, vec3* poi, scalar* alpha, vec3* K) const; // TODO: The K argment is only temporary

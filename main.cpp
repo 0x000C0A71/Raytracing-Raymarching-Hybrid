@@ -101,6 +101,7 @@ int main() {
 	// Composing the Object
 	Object obj = {{verts, 8, tris, 6}};
 	obj.load_bounding_box();
+	obj.transform = {{0, 0, 0}, {1.3, -0.9, 0.5}};
 
 
 	for (int y = 0; y < height; y++) {
