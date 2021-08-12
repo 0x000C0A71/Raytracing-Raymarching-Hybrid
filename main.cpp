@@ -99,8 +99,16 @@ int main() {
 	};
 
 	// Composing the Object
-	Object obj = {{verts, 8, tris, 6}};
-	obj.transform = {{0, 0, 0}, {1.3, -0.9, 0.5}};
+	Object obj_1 = {
+			{verts, 8, tris, 6},
+			{{0, 0, 0}, {1.3, -0.9, 0.5}}
+	};
+	Object obj_2 = {
+			{verts, 8, tris, 6},
+			{{0, 0, 0}, {0, 0, 0}}
+	};
+	Node* l[2] = {&obj_1, &obj_2};
+	Group obj = {2, l};
 	obj.build();
 
 

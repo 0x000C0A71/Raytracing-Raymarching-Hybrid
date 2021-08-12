@@ -169,6 +169,7 @@ namespace polygon {
 			scalar current_alpha;
 			vec3 current_K{};
 
+			// TODO:                       vvvvvvvvvvvvvvv----- This could be precomputed and cached on the trigon
 			if (!ray_plane_intersection(r, tri.get_plane(), &current_point, &current_alpha)) continue; // TODO: Cache the plane
 			if (!point_on_trigon(tri, current_point, &current_K)) continue;
 
@@ -203,5 +204,36 @@ namespace polygon {
 		*poi = transform.deapply(*poi);
 
 		return did_hit_mesh;
+	}
+
+	bool Group::intersect_ray(ray r, vec3* poi, scalar* alpha, vec3* K) const {
+
+		bool did_hit = false;
+
+		vec3 best_point{};
+		scalar best_alpha = INFINITY;
+		vec3 best_K{};
+
+		for (int i = 0; i < no_children; i++) {
+			vec3 current_point{};
+			scalar current_alpha;
+			vec3 current_K{};
+
+			if (!children[i]->intersect_ray(r, &current_point, &current_alpha, &current_K)) continue;
+
+			did_hit = true;
+
+			if (current_alpha < best_alpha) {
+				best_point = current_point;
+				best_alpha = current_alpha;
+				best_K = current_K;
+			}
+		}
+
+		*poi = best_point;
+		*alpha = best_alpha;
+		*K = best_K;
+
+		return did_hit;
 	}
 }

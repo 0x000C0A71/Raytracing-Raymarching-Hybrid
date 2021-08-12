@@ -6,6 +6,7 @@
 #define RAYTRACING_RAYMARCHING_HYBRID_RAYTRACING_H
 
 #include "Types.h"
+#include <cstdio>
 
 // Infinities
 inline double inf(double probe) {
@@ -62,6 +63,19 @@ namespace polygon {
 			return check_x && check_y && check_z;
 		}
 
+		inline Box operator+(Box o) const {
+			const scalar x1 = min(A.x, o.A.x);
+			const scalar x2 = max(B.x, o.B.x);
+			const scalar y1 = min(A.y, o.A.y);
+			const scalar y2 = max(B.y, o.B.y);
+			const scalar z1 = min(A.z, o.A.z);
+			const scalar z2 = max(B.z, o.B.z);
+			return {
+					{x1, y1, z1},
+					{x2, y2, z2}
+			};
+		}
+
 		bool intersect_ray(ray r) const;
 	};
 
@@ -89,19 +103,47 @@ namespace polygon {
 		bool intersect_ray(ray r, vec3* poi, scalar* alpha, int* trigon_index, vec3* K) const;
 	};
 
-	struct Object {
+	struct Node {
+		virtual inline void build() {}
+
+		virtual bool intersect_ray(ray r, vec3* poi, scalar* alpha, vec3* K) const {};
+	};
+
+	struct Object : Node {
 		// I should do transformations here aswell, but I can't be bothered right now.
 		Mesh mesh;
-		Box bounding_box;
+		Box bounding_box{};
 
-		transform transform;
+		Transform transform{};
 
-		inline void build() {
+		// Object(Mesh mesh):mesh(mesh){};
+		Object(Mesh mesh, Transform transform) : mesh(mesh), transform(transform) {};
+
+		inline void build() override {
 			transform.build();
 			bounding_box = mesh.get_bounding_box();
 		}
 
-		bool intersect_ray(ray r, vec3* poi, scalar* alpha, vec3* K) const; // TODO: The K argment is only temporary
+		bool
+		intersect_ray(ray r, vec3* poi, scalar* alpha, vec3* K) const override; // TODO: The K argment is only temporary
+	};
+
+	struct Group : Node {
+		Node** children{};
+		int no_children{};
+
+		Group() = default;;
+
+		Group(int no_children, Node** children) : children(children), no_children(no_children) {};
+
+		inline void build() override {
+
+			for (int i = 0; i < no_children; i++) {
+				children[i]->build();
+			}
+		}
+
+		bool intersect_ray(ray r, vec3* poi, scalar* alpha, vec3* K) const override;
 	};
 
 	// TODO: Make these member functions of the respective types.

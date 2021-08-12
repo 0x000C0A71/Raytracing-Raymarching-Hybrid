@@ -178,7 +178,7 @@ struct rotator {
 	}
 };
 
-struct transform {
+struct Transform {
 	vec3 translation;
 	rotator rotation;
 	// vec3 scale;
