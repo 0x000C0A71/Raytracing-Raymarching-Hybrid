@@ -4,65 +4,20 @@
 #include "Types.h"
 #include "Raytracing.h"
 #include "Pathtracing.h"
+#include "BMP_export.cpp"
 #include <cstdio>
 #include <ctime>
 #include <cstring>
 
 using namespace pathtracing;
 
-struct col {
-	char r, g, b;
-};
-
 //        MUST BE DEVISABLE BY 4
 const int width = 2048;
 const int height = 2048;
 
-const int headerSize = 14;
-const int DIBSize = 40;
-const int pixelsSize = width*height*3;
 
 col* pixels;
 
-FILE* fp;
-
-
-inline void printInt(int v) {
-	char* cp = (char*) (&v);
-	fputc(*(cp + 0), fp);
-	fputc(*(cp + 1), fp);
-	fputc(*(cp + 2), fp);
-	fputc(*(cp + 3), fp);
-}
-
-inline void printInt16(int v) {
-	char* cp = (char*) (&v);
-	fputc(*(cp + 0), fp);
-	fputc(*(cp + 1), fp);
-}
-
-inline void printBIH() {
-	printInt(DIBSize);
-	printInt(width);
-	printInt(height);
-	printInt16(1);
-	printInt16(24);
-	printInt(0);
-	printInt(pixelsSize);
-	printInt(0);
-	printInt(0);
-	printInt(0);
-	printInt(0);
-}
-
-inline void dumpPixels(col* px, int num) {
-	for (int i = 0; i < num; i++) {
-		col pix = px[i];
-		fputc(pix.b, fp);
-		fputc(pix.g, fp);
-		fputc(pix.r, fp);
-	}
-}
 
 int main() {
 	pixels = new col[width*height];
@@ -172,25 +127,7 @@ int main() {
 	printf("\nFinished rendering the frame!");
 	printf("\nBeginning writing it to a file (with my dodgey bitmap exporter)...");
 
-
-	fp = fopen("test.bmp", "wb");
-
-	fputc('B', fp);
-	fputc('M', fp);
-
-	printInt(headerSize + DIBSize + pixelsSize);
-
-	fputc(0, fp);
-	fputc(0, fp);
-	fputc(0, fp);
-	fputc(0, fp);
-
-	printInt(headerSize + DIBSize);
-
-	printBIH();
-	dumpPixels(pixels, width*height);
-
-	fclose(fp);
+	export_image(pixels, width, height);
 
 	printf("\nFinished writing it to a file!");
 	printf("\n\nrendering took %.3f seconds!\n", (double) (stop - start)/CLOCKS_PER_SEC);
