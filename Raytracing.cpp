@@ -90,37 +90,37 @@ namespace polygon {
 		const scalar fy2 = dy2/r.direction.y; // might be inf
 		const scalar fz2 = dz2/r.direction.z; // might be inf
 
-		if ((fx1 > 0) && (fx1 < INFINITY)) {
+		if ((fx1 > 0) && (fx1 < INFINITY_S)) {
 			const vec3 point = r.origin + (r.direction*fx1);
 			const bool check_1 = (max(A.y, B.y) >= point.y) && (min(A.y, B.y) <= point.y);
 			const bool check_2 = (max(A.z, B.z) >= point.z) && (min(A.z, B.z) <= point.z);
 			if (check_1 && check_2) { return true; }
 		}
-		if ((fy1 > 0) && (fy1 < INFINITY)) {
+		if ((fy1 > 0) && (fy1 < INFINITY_S)) {
 			const vec3 point = r.origin + (r.direction*fy1);
 			const bool check_1 = (max(A.z, B.z) >= point.z) && (min(A.z, B.z) <= point.z);
 			const bool check_2 = (max(A.x, B.x) >= point.x) && (min(A.x, B.x) <= point.x);
 			if (check_1 && check_2) { return true; }
 		}
-		if ((fz1 > 0) && (fz1 < INFINITY)) {
+		if ((fz1 > 0) && (fz1 < INFINITY_S)) {
 			const vec3 point = r.origin + (r.direction*fz1);
 			const bool check_1 = (max(A.x, B.x) >= point.x) && (min(A.x, B.x) <= point.x);
 			const bool check_2 = (max(A.y, B.y) >= point.y) && (min(A.y, B.y) <= point.y);
 			if (check_1 && check_2) { return true; }
 		}
-		if ((fx2 > 0) && (fx2 < INFINITY)) {
+		if ((fx2 > 0) && (fx2 < INFINITY_S)) {
 			const vec3 point = r.origin + (r.direction*fx2);
 			const bool check_1 = (max(A.y, B.y) >= point.y) && (min(A.y, B.y) <= point.y);
 			const bool check_2 = (max(A.z, B.z) >= point.z) && (min(A.z, B.z) <= point.z);
 			if (check_1 && check_2) { return true; }
 		}
-		if ((fy2 > 0) && (fy2 < INFINITY)) {
+		if ((fy2 > 0) && (fy2 < INFINITY_S)) {
 			const vec3 point = r.origin + (r.direction*fy2);
 			const bool check_1 = (max(A.z, B.z) >= point.z) && (min(A.z, B.z) <= point.z);
 			const bool check_2 = (max(A.x, B.x) >= point.x) && (min(A.x, B.x) <= point.x);
 			if (check_1 && check_2) { return true; }
 		}
-		if ((fz2 > 0) && (fz2 < INFINITY)) {
+		if ((fz2 > 0) && (fz2 < INFINITY_S)) {
 			const vec3 point = r.origin + (r.direction*fz2);
 			const bool check_1 = (max(A.x, B.x) >= point.x) && (min(A.x, B.x) <= point.x);
 			const bool check_2 = (max(A.y, B.y) >= point.y) && (min(A.y, B.y) <= point.y);
@@ -165,6 +165,10 @@ namespace polygon {
 
 			const trigon tri = get_derefed_tri(current_index);
 
+#ifdef DO_BACKFACE_CULLING
+			if ((tri.get_normal()^r.direction) < 0) continue;
+#endif
+
 			vec3 current_point{};
 			scalar current_alpha;
 			vec3 current_K{};
@@ -191,48 +195,49 @@ namespace polygon {
 		return did_hit;
 	}
 
-	bool Object::intersect_ray(ray r, vec3* poi, scalar* alpha, vec3* K) const {
+	bool Object::intersect_ray(ray r, vec3* poi, scalar* alpha, Node** intersected_object) const {
 		r = transform.deapply(r);
 
 		const bool did_hit_box = bounding_box.intersect_ray(r);
 		if (!did_hit_box) return false;
 
-
+		vec3 K{};
 		int trigon_index;
-		const bool did_hit_mesh = mesh.intersect_ray(r, poi, alpha, &trigon_index, K);
+		const bool did_hit_mesh = mesh.intersect_ray(r, poi, alpha, &trigon_index, &K);
 
 		*poi = transform.deapply(*poi);
+		*intersected_object = (Node*) this;
 
 		return did_hit_mesh;
 	}
 
-	bool Group::intersect_ray(ray r, vec3* poi, scalar* alpha, vec3* K) const {
+	bool Group::intersect_ray(ray r, vec3* poi, scalar* alpha, Node** intersected_object) const {
 
 		bool did_hit = false;
 
 		vec3 best_point{};
 		scalar best_alpha = INFINITY;
-		vec3 best_K{};
+		Node* best_Object{};
 
 		for (int i = 0; i < no_children; i++) {
 			vec3 current_point{};
 			scalar current_alpha;
-			vec3 current_K{};
+			Node* current_Object{};
 
-			if (!children[i]->intersect_ray(r, &current_point, &current_alpha, &current_K)) continue;
+			if (!children[i]->intersect_ray(r, &current_point, &current_alpha, &current_Object)) continue;
 
 			did_hit = true;
 
 			if (current_alpha < best_alpha) {
 				best_point = current_point;
 				best_alpha = current_alpha;
-				best_K = current_K;
+				best_Object = current_Object;
 			}
 		}
 
 		*poi = best_point;
 		*alpha = best_alpha;
-		*K = best_K;
+		*intersected_object = best_Object;
 
 		return did_hit;
 	}

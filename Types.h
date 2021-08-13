@@ -13,6 +13,20 @@
 #define min(a, b) ((a) > (b) ? (b) : (a))
 
 
+// Infinities
+inline double inf(double probe) {
+	const unsigned long long k = 0x7FF0000000000000;
+	return *(double*) (&k);
+}
+
+inline float inf(float probe) {
+	const unsigned long int k = 0x7F800000;
+	return *(float*) (&k);
+}
+
+#define INFINITY_S (inf((scalar)1))
+
+
 // Changing this changes the type for the scalar.
 // So you can change this to double for more accuracy
 typedef double scalar;
@@ -211,5 +225,20 @@ struct Transform {
 		return r;
 	}
 };
+
+
+
+
+
+
+
+struct Material {
+	vec3 base_color;
+	scalar roughness;
+	scalar emission;
+};
+
+
+
 
 #endif //RAYTRACING_RAYMARCHING_HYBRID_TYPES_H

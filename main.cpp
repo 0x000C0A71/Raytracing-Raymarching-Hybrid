@@ -3,11 +3,12 @@
 
 #include "Types.h"
 #include "Raytracing.h"
+#include "Pathtracing.h"
 #include <cstdio>
 #include <ctime>
 #include <cstring>
 
-using namespace polygon;
+using namespace pathtracing;
 
 struct col {
 	char r, g, b;
@@ -73,11 +74,11 @@ int main() {
 	start = clock();
 
 	// Setting up the ray
-	ray r = {{-2.5, 0, 0},
+	ray r = {{-2, 0, 0},
 	         {0,    0, 1}};
 
 	// The list of vertices
-	vec3 verts[] = {
+	vec3 verts_1[] = {
 			{1,  1,  1},
 			{1,  1,  -1},
 			{1,  -1, 1},
@@ -89,40 +90,81 @@ int main() {
 	};
 
 	// The list of Trigons
-	ref_trigon tris[] = {
-			{1, 5, 7},
+	polygon::ref_trigon tris_1[] = {
+			{5, 1, 7},
 			{1, 3, 7},
-			{1, 3, 0},
+			{3, 1, 0},
 			{2, 3, 0},
-			{2, 4, 0},
+			{4, 2, 0},
 			{2, 4, 6}
 	};
 
-	// Composing the Object
-	Object obj_1 = {
-			{verts, 8, tris, 6},
-			{{0, 0, 0}, {1.3, -0.9, 0.5}}
+
+	// The list of vertices
+	vec3 verts_2[] = {
+			{1,  1,  0},
+			{1,  -1,  0},
+			{-1,  1, 0},
+			{-1,  -1, 0}
 	};
-	Object obj_2 = {
-			{verts, 8, tris, 6},
+
+	// The list of Trigons
+	polygon::ref_trigon tris_2[] = {
+			{2, 1, 0},
+			{1, 2, 3}
+	};
+
+
+	// The list of vertices
+	vec3 verts_3[] = {
+			{0.5,  0.5,  0},
+			{0.5,  -0.5,  0},
+			{-0.5,  0.5, 0},
+			{-0.5,  -0.5, 0}
+	};
+
+	// The list of Trigons
+	polygon::ref_trigon tris_3[] = {
+			{2, 1, 0},
+			{1, 2, 3}
+	};
+
+	// Composing the Object
+	polygon::Object obj_1 = {
+			{verts_1, 8, tris_1, 6},
 			{{0, 0, 0}, {0, 0, 0}}
 	};
-	Node* l[2] = {&obj_1, &obj_2};
-	Group obj = {2, l};
+	obj_1.mat = {{0.8, 0.8, 0.8}, 0.5, 0.0};
+	polygon::Object obj_2 = {
+			{verts_2, 4, tris_2, 2},
+			{{0, -1, 0}, {1.57, 0, 0}}
+	};
+	obj_2.mat = {{0.8, 0, 0}, 0.5, 0.0};
+	polygon::Object obj_3 = {
+			{verts_2, 4, tris_2, 2},
+			{{0, 1, 0}, {-1.57, 0, 0}}
+	};
+	obj_3.mat = {{0, 0.8, 0}, 0.5, 0.0};
+	polygon::Object obj_4 = {
+			{verts_3, 4, tris_3, 2},
+			{{0, 0, 0.9}, {0, 0, 0}}
+	};
+	obj_4.mat = {{1, 1, 1}, 0.5, 1};
+	polygon::Node* l[] = {&obj_1, &obj_2, &obj_3, &obj_4};
+	polygon::Group obj = {4, l};
 	obj.build();
+
+	Pathtracer pt = {&obj};
 
 
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
 			r.direction = {1, ((float) x)/width*2 - 1, ((float) y)/height*2 - 1};
 
-			vec3 poi{};
-			scalar alpha;
-			vec3 K{};
-			if (obj.intersect_ray(r, &poi, &alpha, &K)) {
-				col cc = {(char) (K.x*255), (char) (K.y*255), (char) (K.z*255)};
-				pixels[y*width + x] = cc;
-			}
+			vec3 light = pt.trace_path(r, 1);
+
+			col cc = {(char) (light.x*255), (char) (light.y*255), (char) (light.z*255)};
+			pixels[y*width + x] = cc;
 		}
 	}
 

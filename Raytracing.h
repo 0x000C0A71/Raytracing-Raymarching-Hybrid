@@ -6,20 +6,9 @@
 #define RAYTRACING_RAYMARCHING_HYBRID_RAYTRACING_H
 
 #include "Types.h"
+#include "Config.h"
 #include <cstdio>
 
-// Infinities
-inline double inf(double probe) {
-	const unsigned long long k = 0x7FF0000000000000;
-	return *(double*) (&k);
-}
-
-inline float inf(float probe) {
-	const unsigned long int k = 0x7F800000;
-	return *(float*) (&k);
-}
-
-#define INFINITY (inf((scalar)1))
 
 namespace polygon {
 	struct plane {
@@ -106,7 +95,7 @@ namespace polygon {
 	struct Node {
 		virtual inline void build() {}
 
-		virtual bool intersect_ray(ray r, vec3* poi, scalar* alpha, vec3* K) const {};
+		virtual bool intersect_ray(ray r, vec3* poi, scalar* alpha, Node** intersected_object) const {};
 	};
 
 	struct Object : Node {
@@ -116,6 +105,8 @@ namespace polygon {
 
 		Transform transform{};
 
+		Material mat{};
+
 		// Object(Mesh mesh):mesh(mesh){};
 		Object(Mesh mesh, Transform transform) : mesh(mesh), transform(transform) {};
 
@@ -124,8 +115,7 @@ namespace polygon {
 			bounding_box = mesh.get_bounding_box();
 		}
 
-		bool
-		intersect_ray(ray r, vec3* poi, scalar* alpha, vec3* K) const override; // TODO: The K argment is only temporary
+		bool intersect_ray(ray r, vec3* poi, scalar* alpha, Node** intersected_object) const override;
 	};
 
 	struct Group : Node {
@@ -143,7 +133,7 @@ namespace polygon {
 			}
 		}
 
-		bool intersect_ray(ray r, vec3* poi, scalar* alpha, vec3* K) const override;
+		bool intersect_ray(ray r, vec3* poi, scalar* alpha, Node** intersected_object) const override;
 	};
 
 	// TODO: Make these member functions of the respective types.
