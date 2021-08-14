@@ -89,17 +89,16 @@ namespace polygon {
 
 		Box get_bounding_box() const;
 
-		bool intersect_ray(ray r, vec3* poi, scalar* alpha, int* trigon_index, vec3* K) const;
+		bool intersect_ray(ray r, vec3* poi, scalar* alpha, int* trigon_index, vec3* normal) const;
 	};
 
 	struct Node {
 		virtual inline void build() {}
 
-		virtual bool intersect_ray(ray r, vec3* poi, scalar* alpha, Node** intersected_object) const {};
+		virtual bool intersect_ray(ray r, vec3* poi, scalar* alpha, vec3* normal, Node** intersected_object) const {};
 	};
 
 	struct Object : Node {
-		// I should do transformations here aswell, but I can't be bothered right now.
 		Mesh mesh;
 		Box bounding_box{};
 
@@ -115,7 +114,7 @@ namespace polygon {
 			bounding_box = mesh.get_bounding_box();
 		}
 
-		bool intersect_ray(ray r, vec3* poi, scalar* alpha, Node** intersected_object) const override;
+		bool intersect_ray(ray r, vec3* poi, scalar* alpha, vec3* normal, Node** intersected_object) const override;
 	};
 
 	struct Group : Node {
@@ -133,7 +132,7 @@ namespace polygon {
 			}
 		}
 
-		bool intersect_ray(ray r, vec3* poi, scalar* alpha, Node** intersected_object) const override;
+		bool intersect_ray(ray r, vec3* poi, scalar* alpha, vec3* normal, Node** intersected_object) const override;
 	};
 
 	// TODO: Make these member functions of the respective types.

@@ -7,6 +7,7 @@
 
 #include "fast_inverse_square_root.h"
 #include <cmath> // TODO: Please remove this. I hate depending on libraries. It's my kryptonite
+#include <cstdlib> // TODO: Please remove this. I hate depending on libraries. It's my kryptonite
 
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
@@ -87,6 +88,7 @@ inline vec3 lerp(vec3 a, vec3 b, scalar t) {
 	};
 }
 
+
 // Return the squared length of a given vector.
 inline scalar sqLength(vec3 v) {
 	return v.x*v.x + v.y*v.y + v.z*v.z;
@@ -100,6 +102,20 @@ inline vec3 normalize(vec3 v) {
 
 inline vec3 reflect(vec3 v, vec3 n) {
 	return v - (n*(2*(v^n)));
+}
+
+inline vec3 random_normal() {
+	scalar x = 2*((scalar) rand()/(scalar) RAND_MAX) - 1;
+	scalar y = 2*((scalar) rand()/(scalar) RAND_MAX) - 1;
+	scalar z = 2*((scalar) rand()/(scalar) RAND_MAX) - 1;
+	while (sqLength({x, y, z}) > 1) {
+		x = 2*((scalar) rand()/(scalar) RAND_MAX) - 1;
+		y = 2*((scalar) rand()/(scalar) RAND_MAX) - 1;
+		z = 2*((scalar) rand()/(scalar) RAND_MAX) - 1;
+	}
+	// TODO: The normalization is not really necessary for reflect_rough. Removing it will speed up the engine and give better reflections.
+	//return normalize({x, y, z});
+	return {x, y, z};
 }
 
 struct ray {
@@ -227,18 +243,11 @@ struct Transform {
 };
 
 
-
-
-
-
-
 struct Material {
 	vec3 base_color;
 	scalar roughness;
 	scalar emission;
 };
-
-
 
 
 #endif //RAYTRACING_RAYMARCHING_HYBRID_TYPES_H

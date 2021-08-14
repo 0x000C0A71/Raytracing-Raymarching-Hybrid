@@ -11,4 +11,10 @@
 // Whether the engine should cull faces that face away from the camera
 #define DO_BACKFACE_CULLING
 
+#define SAMPLES 32
+
+#define MAX_BOUNCE_COUNT 18
+
+#define CLEARANCE_DIST 0.001
+
 #endif //RAYTRACING_RAYMARCHING_HYBRID_CONFIG_H

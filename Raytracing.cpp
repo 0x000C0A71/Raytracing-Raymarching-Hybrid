@@ -150,14 +150,14 @@ namespace polygon {
 		        {x2, y2, z2}};
 	}
 
-	bool Mesh::intersect_ray(ray r, vec3* poi, scalar* alpha, int* trigon_index, vec3* K) const {
+	bool Mesh::intersect_ray(ray r, vec3* poi, scalar* alpha, int* trigon_index, vec3* normal) const {
 		// Ouch!!
 
 		bool did_hit = false;
 
 		vec3 best_point{};
 		scalar best_alpha = INFINITY;
-		vec3 best_K{};
+		vec3 best_normal{};
 		int best_index;
 
 		for (int current_index = 0; current_index < number_of_tris; current_index++) {
@@ -165,78 +165,86 @@ namespace polygon {
 
 			const trigon tri = get_derefed_tri(current_index);
 
-#ifdef DO_BACKFACE_CULLING
-			if ((tri.get_normal()^r.direction) < 0) continue;
-#endif
 
 			vec3 current_point{};
 			scalar current_alpha;
-			vec3 current_K{};
+			vec3 throwaway_K{};
+
+			const vec3 current_normal = tri.get_normal();
+
+#ifdef DO_BACKFACE_CULLING
+			if ((current_normal^r.direction) < 0) continue;
+#endif
 
 			// TODO:                       vvvvvvvvvvvvvvv----- This could be precomputed and cached on the trigon
 			if (!ray_plane_intersection(r, tri.get_plane(), &current_point, &current_alpha)) continue; // TODO: Cache the plane
-			if (!point_on_trigon(tri, current_point, &current_K)) continue;
+			if (!point_on_trigon(tri, current_point, &throwaway_K)) continue;
 
 			did_hit = true;
 
 			if (current_alpha < best_alpha) {
 				best_point = current_point;
 				best_alpha = current_alpha;
-				best_K = current_K;
+				best_normal = current_normal;
 				best_index = current_index;
 			}
 		}
 
 		*poi = best_point;
 		*alpha = best_alpha;
-		*K = best_K;
+		*normal = best_normal;
 		*trigon_index = best_index;
 
 		return did_hit;
 	}
 
-	bool Object::intersect_ray(ray r, vec3* poi, scalar* alpha, Node** intersected_object) const {
+	bool Object::intersect_ray(ray r, vec3* poi, scalar* alpha, vec3* normal, Node** intersected_object) const {
 		r = transform.deapply(r);
 
 		const bool did_hit_box = bounding_box.intersect_ray(r);
 		if (!did_hit_box) return false;
 
-		vec3 K{};
+		vec3 loc_normal{};
 		int trigon_index;
-		const bool did_hit_mesh = mesh.intersect_ray(r, poi, alpha, &trigon_index, &K);
+		const bool did_hit_mesh = mesh.intersect_ray(r, poi, alpha, &trigon_index, &loc_normal);
 
-		*poi = transform.deapply(*poi);
+		*poi = transform.apply(*poi);
+		*normal = transform.rotation.rotate(loc_normal);
 		*intersected_object = (Node*) this;
 
 		return did_hit_mesh;
 	}
 
-	bool Group::intersect_ray(ray r, vec3* poi, scalar* alpha, Node** intersected_object) const {
+	bool Group::intersect_ray(ray r, vec3* poi, scalar* alpha, vec3* normal, Node** intersected_object) const {
 
 		bool did_hit = false;
 
 		vec3 best_point{};
 		scalar best_alpha = INFINITY;
+		vec3 best_normal{};
 		Node* best_Object{};
 
 		for (int i = 0; i < no_children; i++) {
 			vec3 current_point{};
 			scalar current_alpha;
+			vec3 current_normal{};
 			Node* current_Object{};
 
-			if (!children[i]->intersect_ray(r, &current_point, &current_alpha, &current_Object)) continue;
+			if (!children[i]->intersect_ray(r, &current_point, &current_alpha, &current_normal, &current_Object)) continue;
 
 			did_hit = true;
 
 			if (current_alpha < best_alpha) {
 				best_point = current_point;
 				best_alpha = current_alpha;
+				best_normal = current_normal;
 				best_Object = current_Object;
 			}
 		}
 
 		*poi = best_point;
 		*alpha = best_alpha;
+		*normal = best_normal;
 		*intersected_object = best_Object;
 
 		return did_hit;
