@@ -7,6 +7,8 @@
 
 #include "Types.h"
 #include "Raytracing.h"
+#include "Raymarching.h"
+#include "Raymarching_primitives.h"
 
 namespace pathtracing {
 
@@ -14,8 +16,7 @@ namespace pathtracing {
 	inline vec3 reflect_rough(vec3 normal, vec3 vector, scalar roughness) {
 		vec3 rand_vec = random_normal();
 		const vec3 ref_vec = reflect(vector, normal);
-		// TODO:              v-- This is *theoretically* the wrong way around. It seems to work, but investigate into it.
-		if ((rand_vec^normal) > 0) rand_vec = rand_vec*(-1);
+		if ((rand_vec^normal) < 0) rand_vec = rand_vec*(-1);
 
 		return normalize(lerp(ref_vec, rand_vec, roughness));
 	}
@@ -23,6 +24,7 @@ namespace pathtracing {
 
 	struct Pathtracer {
 		polygon::Node* polygon_root;
+		raymarching::Node* raymarching_root;
 
 		inline bool combined_ray_intersect(ray r, vec3* poi, scalar* dist, vec3* normal, Material* material) const;
 

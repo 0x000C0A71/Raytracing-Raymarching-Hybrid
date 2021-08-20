@@ -9,6 +9,8 @@
 #include <ctime>
 #include <cstring>
 
+#define PI_S 3.14159265359
+
 using namespace pathtracing;
 
 //        MUST BE DEVISABLE BY 4
@@ -61,12 +63,12 @@ int main() {
 
 	// The list of Trigons
 	polygon::ref_trigon tris_1[] = {
-			{5, 1, 7},
-			{1, 3, 7},
-			{3, 1, 0},
-			{2, 3, 0},
-			{4, 2, 0},
-			{2, 4, 6}
+			{5, 7, 1},
+			{1, 7, 3},
+			{3, 0, 1},
+			{2, 0, 3},
+			{4, 0, 2},
+			{2, 6, 4}
 	};
 
 
@@ -80,8 +82,8 @@ int main() {
 
 	// The list of Trigons
 	polygon::ref_trigon tris_2[] = {
-			{2, 1, 0},
-			{1, 2, 3}
+			{2, 0, 1},
+			{1, 3, 2}
 	};
 
 
@@ -95,8 +97,8 @@ int main() {
 
 	// The list of Trigons
 	polygon::ref_trigon tris_3[] = {
-			{2, 1, 0},
-			{1, 2, 3}
+			{2, 0, 1},
+			{1, 3, 2}
 	};
 
 	// Composing the Object
@@ -107,12 +109,12 @@ int main() {
 	obj_1.mat = {{0.8, 0.8, 0.8}, 1, 0.0};
 	polygon::Object obj_2 = {
 			{verts_2,    4, tris_2, 2},
-			{{0, -1, 0}, {1.57, 0, 0}}
+			{{0, -1, 0}, {PI_S/2, 0, 0}}
 	};
 	obj_2.mat = {{0.8, 0, 0}, 0.7, 0.0};
 	polygon::Object obj_3 = {
 			{verts_2,   4, tris_2, 2},
-			{{0, 1, 0}, {-1.57, 0, 0}}
+			{{0, 1, 0}, {-(PI_S/2), 0, 0}}
 	};
 	obj_3.mat = {{0, 0.8, 0}, 0.7, 0.0};
 	polygon::Object obj_4 = {
@@ -124,7 +126,13 @@ int main() {
 	polygon::Group obj = {4, l};
 	obj.build();
 
-	Pathtracer pt = {&obj};
+
+	raymarching::Object* obj_m = new raymarching::primitives::Box(0.3, 0.3, 0.3);
+	obj_m->transform = {{0, 0, 0}, {1, 1, 1.5}};
+	obj_m->mat = {{1, 1, 1}, 0, 0};
+	obj_m->build();
+
+	Pathtracer pt = {&obj, (raymarching::Node*)(obj_m)};
 
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {

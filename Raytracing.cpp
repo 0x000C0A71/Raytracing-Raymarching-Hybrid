@@ -173,7 +173,7 @@ namespace polygon {
 			const vec3 current_normal = tri.get_normal();
 
 #ifdef DO_BACKFACE_CULLING
-			if ((current_normal^r.direction) < 0) continue;
+			if ((current_normal^r.direction) > 0) continue;
 #endif
 
 			// TODO:                       vvvvvvvvvvvvvvv----- This could be precomputed and cached on the trigon

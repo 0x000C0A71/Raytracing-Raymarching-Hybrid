@@ -77,6 +77,15 @@ struct vec3 {
 	inline scalar operator^(vec3 other) const {
 		return x*other.x + y*other.y + z*other.z;
 	}
+
+
+	inline vec3 abs() const {
+		return {
+			x < 0 ? -x : x,
+			y < 0 ? -y : y,
+			z < 0 ? -z : z
+		};
+	}
 };
 
 // Linearly interpolates between vector a & b.
