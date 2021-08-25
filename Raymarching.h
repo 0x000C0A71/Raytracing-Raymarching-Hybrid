@@ -14,7 +14,7 @@ namespace raymarching {
 
 		virtual scalar distance_estimation(vec3 p) const { return INFINITY_S; }
 
-		virtual Node* get_closest_Object(vec3 p) const {};
+		virtual Node* get_closest_Object(vec3 p) const { return nullptr; };
 
 		vec3 get_normal_at(vec3 p) const;
 

@@ -13,8 +13,8 @@
 namespace pathtracing {
 
 
-	inline vec3 reflect_rough(vec3 normal, vec3 vector, scalar roughness) {
-		vec3 rand_vec = random_normal();
+	inline vec3 reflect_rough(vec3 normal, vec3 vector, scalar roughness, rng_engine* random_engine) {
+		vec3 rand_vec = random_normal(random_engine);
 		const vec3 ref_vec = reflect(vector, normal);
 		if ((rand_vec^normal) < 0) rand_vec = rand_vec*(-1);
 
@@ -28,7 +28,7 @@ namespace pathtracing {
 
 		inline bool combined_ray_intersect(ray r, vec3* poi, scalar* dist, vec3* normal, Material* material) const;
 
-		vec3 trace_path(ray r, int max_bounce_count) const;
+		vec3 trace_path(ray r, int max_bounce_count, rng_engine* random_engine) const;
 
 		static inline vec3 get_ambient_color(ray r) {
 			// If you want stuff like HDRIs, implement them here

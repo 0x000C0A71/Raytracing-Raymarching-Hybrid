@@ -7,8 +7,7 @@
 namespace pathtracing {
 
 
-	inline bool
-	Pathtracer::combined_ray_intersect(ray r, vec3* poi, scalar* dist, vec3* normal, Material* material) const {
+	inline bool Pathtracer::combined_ray_intersect(ray r, vec3* poi, scalar* dist, vec3* normal, Material* material) const {
 
 		vec3 poi_pol{};
 		scalar dist_pol{};
@@ -47,7 +46,7 @@ namespace pathtracing {
 		return true;
 	}
 
-	vec3 Pathtracer::trace_path(ray r, int max_bounce_count) const {
+	vec3 Pathtracer::trace_path(ray r, int max_bounce_count, rng_engine* random_engine) const {
 
 		if (max_bounce_count <= 0) return get_ambient_color(r);
 
@@ -59,13 +58,19 @@ namespace pathtracing {
 		const bool did_hit = combined_ray_intersect(r, &poi, &dist, &normal, &mat);
 		if (!did_hit) return get_ambient_color(r);
 		//return (normal + vec3{1, 1, 1})*0.5;
+		//return mat.base_color;
 
-
+#ifdef STOP_BOUNCE_ON_EMMISSION
 		if (mat.emission > 0.5) return mat.base_color*mat.emission;
+#endif
 
-		const vec3 out_dir = reflect_rough(normal, r.direction, mat.roughness);
+		const vec3 out_dir = reflect_rough(normal, r.direction, mat.roughness, random_engine);
 		ray out_r = {poi + (normal*CLEARANCE_DIST), out_dir};
-		vec3 incoming = trace_path(out_r, max_bounce_count - 1);
+		vec3 incoming = trace_path(out_r, max_bounce_count - 1, random_engine);
+
+#ifndef STOP_BOUNCE_ON_EMMISSION
+		incoming = incoming + mat.base_color*mat.emission;
+#endif
 
 		return {
 				mat.base_color.x*incoming.x,

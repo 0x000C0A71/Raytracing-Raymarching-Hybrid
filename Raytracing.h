@@ -95,7 +95,7 @@ namespace polygon {
 	struct Node {
 		virtual inline void build() {}
 
-		virtual bool intersect_ray(ray r, vec3* poi, scalar* alpha, vec3* normal, Node** intersected_object) const {};
+		virtual bool intersect_ray(ray r, vec3* poi, scalar* alpha, vec3* normal, Node** intersected_object) const {return false;}
 	};
 
 	struct Object : Node {

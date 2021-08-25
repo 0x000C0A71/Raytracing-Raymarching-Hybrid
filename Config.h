@@ -12,6 +12,7 @@
 #define DO_BACKFACE_CULLING
 
 #define SAMPLES 1024
+#define NUMBER_OF_THREADS 16
 
 #define MAX_BOUNCE_COUNT 18
 
@@ -19,7 +20,7 @@
 
 
 
-
+#define STOP_BOUNCE_ON_EMMISSION
 
 
 

@@ -9,6 +9,8 @@
 #include <ctime>
 #include <cstring>
 
+#include "Renderer.h"
+
 #define PI_S 3.14159265359
 
 using namespace pathtracing;
@@ -43,7 +45,6 @@ int main() {
 
 	printf("starting render...");
 	clock_t start, stop;
-	start = clock();
 
 	// Setting up the ray
 	ray r = {{-3, 0, 0},
@@ -127,34 +128,35 @@ int main() {
 	obj.build();
 
 
-	raymarching::Object* obj_m = new raymarching::primitives::Box(0.3, 0.3, 0.3);
-	obj_m->transform = {{0, 0, 0}, {1, 1, 1.5}};
-	obj_m->mat = {{1, 1, 1}, 0, 0};
+	raymarching::Object* obj_m = new raymarching::primitives::Torus(0.4, 0.15);
+	obj_m->transform = {{0, 0, 0},
+	                    {1, 1, 1.5}};
+	obj_m->mat = {{1, 1, 1}, 0.3, 0};
 	obj_m->build();
 
-	Pathtracer pt = {&obj, (raymarching::Node*)(obj_m)};
+	Pathtracer pt = {&obj, (raymarching::Node*) (obj_m)};
 
-	for (int y = 0; y < height; y++) {
-		for (int x = 0; x < width; x++) {
-
-			r.direction = {2, ((float) x)/width*2 - 1, ((float) y)/height*2 - 1};
-			r.direction = normalize(r.direction);
+	Renderer rr = Renderer{pt, width, height, NUMBER_OF_THREADS};
 
 
-			vec3 light{};
-			for (int i = 0; i < SAMPLES; i++) {
-				light = light + pt.trace_path(r, MAX_BOUNCE_COUNT);
-			}
+	vec3* buff = new vec3[width*height];
 
-			light = light*(1.0/SAMPLES);
-
-			col cc = from_light(light);
-			pixels[y*width + x] = cc;
-		}
-	}
-
+	start = clock();
+	rr.multisample_frame(buff);
 	stop = clock();
+
 	printf("\nFinished rendering the frame!");
+
+	printf("\nTonemapping... ");
+	rr.tonemap_frame(buff);
+
+	for (int j = 0; j < width*height; ++j) {
+		pixels[j] = from_light(buff[j]);
+	}
+	printf("Done!");
+
+
+
 	printf("\nBeginning writing it to a file (with my dodgey bitmap exporter)...");
 
 	export_image(pixels, width, height);

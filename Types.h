@@ -8,6 +8,7 @@
 #include "fast_inverse_square_root.h"
 #include <cmath> // TODO: Please remove this. I hate depending on libraries. It's my kryptonite
 #include <cstdlib> // TODO: Please remove this. I hate depending on libraries. It's my kryptonite
+#include <random>
 
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
@@ -31,6 +32,10 @@ inline float inf(float probe) {
 // Changing this changes the type for the scalar.
 // So you can change this to double for more accuracy
 typedef double scalar;
+
+
+//typedef std::mt19937 rng_engine;
+typedef std::mersenne_twister_engine<unsigned int, 32, 624, 397, 31, 0x9908b0df, 11, 0xffffffff, 7, 0x9d2c5680, 15, 0xefc60000, 18, 1812433253> rng_engine;
 
 // 3D vectors
 struct vec3 {
@@ -81,9 +86,9 @@ struct vec3 {
 
 	inline vec3 abs() const {
 		return {
-			x < 0 ? -x : x,
-			y < 0 ? -y : y,
-			z < 0 ? -z : z
+				x < 0 ? -x : x,
+				y < 0 ? -y : y,
+				z < 0 ? -z : z
 		};
 	}
 };
@@ -113,14 +118,15 @@ inline vec3 reflect(vec3 v, vec3 n) {
 	return v - (n*(2*(v^n)));
 }
 
-inline vec3 random_normal() {
-	scalar x = 2*((scalar) rand()/(scalar) RAND_MAX) - 1;
-	scalar y = 2*((scalar) rand()/(scalar) RAND_MAX) - 1;
-	scalar z = 2*((scalar) rand()/(scalar) RAND_MAX) - 1;
+inline vec3 random_normal(rng_engine* engine) {
+	std::uniform_real_distribution<scalar> distribution(-1, 1.0);
+	scalar x = distribution(*engine);
+	scalar y = distribution(*engine);
+	scalar z = distribution(*engine);
 	while (sqLength({x, y, z}) > 1) {
-		x = 2*((scalar) rand()/(scalar) RAND_MAX) - 1;
-		y = 2*((scalar) rand()/(scalar) RAND_MAX) - 1;
-		z = 2*((scalar) rand()/(scalar) RAND_MAX) - 1;
+		x = distribution(*engine);
+		y = distribution(*engine);
+		z = distribution(*engine);
 	}
 	// TODO: The normalization is not really necessary for reflect_rough. Removing it will speed up the engine and give better reflections.
 	//return normalize({x, y, z});
