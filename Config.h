@@ -11,7 +11,7 @@
 // Whether the engine should cull faces that face away from the camera
 #define DO_BACKFACE_CULLING
 
-#define SAMPLES 1024
+#define SAMPLES 1
 #define NUMBER_OF_THREADS 16
 
 #define MAX_BOUNCE_COUNT 18

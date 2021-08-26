@@ -54,7 +54,7 @@ void Renderer::tonemap_frame(vec3* frame) const {
 	}
 
 	const vec3 average_light = total_light*((scalar) 1/(scalar) no_pixels); // painful division
-	const scalar average_strength = max(average_light.x, max(average_light.y, average_light.z)); // ew
+	const scalar average_strength = max_S(average_light.x, max_S(average_light.y, average_light.z)); // ew
 
 	const scalar factor = (scalar) 1/(average_strength*2);
 

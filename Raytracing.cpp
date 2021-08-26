@@ -92,38 +92,38 @@ namespace polygon {
 
 		if ((fx1 > 0) && (fx1 < INFINITY_S)) {
 			const vec3 point = r.origin + (r.direction*fx1);
-			const bool check_1 = (max(A.y, B.y) >= point.y) && (min(A.y, B.y) <= point.y);
-			const bool check_2 = (max(A.z, B.z) >= point.z) && (min(A.z, B.z) <= point.z);
+			const bool check_1 = (max_S(A.y, B.y) >= point.y) && (min_S(A.y, B.y) <= point.y);
+			const bool check_2 = (max_S(A.z, B.z) >= point.z) && (min_S(A.z, B.z) <= point.z);
 			if (check_1 && check_2) { return true; }
 		}
 		if ((fy1 > 0) && (fy1 < INFINITY_S)) {
 			const vec3 point = r.origin + (r.direction*fy1);
-			const bool check_1 = (max(A.z, B.z) >= point.z) && (min(A.z, B.z) <= point.z);
-			const bool check_2 = (max(A.x, B.x) >= point.x) && (min(A.x, B.x) <= point.x);
+			const bool check_1 = (max_S(A.z, B.z) >= point.z) && (min_S(A.z, B.z) <= point.z);
+			const bool check_2 = (max_S(A.x, B.x) >= point.x) && (min_S(A.x, B.x) <= point.x);
 			if (check_1 && check_2) { return true; }
 		}
 		if ((fz1 > 0) && (fz1 < INFINITY_S)) {
 			const vec3 point = r.origin + (r.direction*fz1);
-			const bool check_1 = (max(A.x, B.x) >= point.x) && (min(A.x, B.x) <= point.x);
-			const bool check_2 = (max(A.y, B.y) >= point.y) && (min(A.y, B.y) <= point.y);
+			const bool check_1 = (max_S(A.x, B.x) >= point.x) && (min_S(A.x, B.x) <= point.x);
+			const bool check_2 = (max_S(A.y, B.y) >= point.y) && (min_S(A.y, B.y) <= point.y);
 			if (check_1 && check_2) { return true; }
 		}
 		if ((fx2 > 0) && (fx2 < INFINITY_S)) {
 			const vec3 point = r.origin + (r.direction*fx2);
-			const bool check_1 = (max(A.y, B.y) >= point.y) && (min(A.y, B.y) <= point.y);
-			const bool check_2 = (max(A.z, B.z) >= point.z) && (min(A.z, B.z) <= point.z);
+			const bool check_1 = (max_S(A.y, B.y) >= point.y) && (min_S(A.y, B.y) <= point.y);
+			const bool check_2 = (max_S(A.z, B.z) >= point.z) && (min_S(A.z, B.z) <= point.z);
 			if (check_1 && check_2) { return true; }
 		}
 		if ((fy2 > 0) && (fy2 < INFINITY_S)) {
 			const vec3 point = r.origin + (r.direction*fy2);
-			const bool check_1 = (max(A.z, B.z) >= point.z) && (min(A.z, B.z) <= point.z);
-			const bool check_2 = (max(A.x, B.x) >= point.x) && (min(A.x, B.x) <= point.x);
+			const bool check_1 = (max_S(A.z, B.z) >= point.z) && (min_S(A.z, B.z) <= point.z);
+			const bool check_2 = (max_S(A.x, B.x) >= point.x) && (min_S(A.x, B.x) <= point.x);
 			if (check_1 && check_2) { return true; }
 		}
 		if ((fz2 > 0) && (fz2 < INFINITY_S)) {
 			const vec3 point = r.origin + (r.direction*fz2);
-			const bool check_1 = (max(A.x, B.x) >= point.x) && (min(A.x, B.x) <= point.x);
-			const bool check_2 = (max(A.y, B.y) >= point.y) && (min(A.y, B.y) <= point.y);
+			const bool check_1 = (max_S(A.x, B.x) >= point.x) && (min_S(A.x, B.x) <= point.x);
+			const bool check_2 = (max_S(A.y, B.y) >= point.y) && (min_S(A.y, B.y) <= point.y);
 			if (check_1 && check_2) { return true; }
 		}
 
@@ -139,12 +139,12 @@ namespace polygon {
 		scalar z1, z2;
 		for (int i = 0; i < number_of_verts; i++) {
 			const vec3 vert = verts[i];
-			x1 = min(x1, vert.x);
-			y1 = min(y1, vert.y);
-			z1 = min(z1, vert.z);
-			x2 = max(x2, vert.x);
-			y2 = max(y2, vert.y);
-			z2 = max(z2, vert.z);
+			x1 = min_S(x1, vert.x);
+			y1 = min_S(y1, vert.y);
+			z1 = min_S(z1, vert.z);
+			x2 = max_S(x2, vert.x);
+			y2 = max_S(y2, vert.y);
+			z2 = max_S(z2, vert.z);
 		}
 		return {{x1, y1, z1},
 		        {x2, y2, z2}};

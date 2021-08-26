@@ -29,9 +29,9 @@ namespace raymarching {
 
 			scalar distance_function(vec3 p) const override {
 				const vec3 q = p.abs() - dimensions;
-				const scalar k = max(q.y, q.z);
-				const scalar l = max(q.x, k);
-				return fsqrt(sqLength({max(q.x, 0.0), max(q.y, 0.0), max(q.z, 0.0)})) + min(l, 0.0) - 0.04;
+				const scalar k = max_S(q.y, q.z);
+				const scalar l = max_S(q.x, k);
+				return fsqrt(sqLength({max_S(q.x, 0.0), max_S(q.y, 0.0), max_S(q.z, 0.0)})) + min_S(l, 0.0) - 0.04;
 			}
 		};
 
