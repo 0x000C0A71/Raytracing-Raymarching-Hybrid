@@ -32,12 +32,12 @@ namespace pathtracing {
 		if (!did_hit_pol && !did_hit_mar) return false;
 
 		if (dist_pol < dist_mar) {
-			*material = ((polygon::Object*) hit_Object)->mat; // UNSAFE!!!! (should be good tho)
+			*material = ((polygon::Object*)hit_Object)->mat; // UNSAFE!!!! (should be good tho)
 			*poi = poi_pol;
 			*dist = dist_pol;
 			*normal = normal_pol;
 		} else {
-			*material = ((raymarching::Object*) hit_Object_mar)->mat; // UNSAFE!!!! (should be good tho)
+			*material = ((raymarching::Object*)hit_Object_mar)->mat; // UNSAFE!!!! (should be good tho)
 			*poi = poi_mar;
 			*dist = dist_mar;
 			*normal = normal_mar;
@@ -60,7 +60,7 @@ namespace pathtracing {
 		//return (normal + vec3{1, 1, 1})*0.5;
 		//return mat.base_color;
 
-#ifdef STOP_BOUNCE_ON_EMMISSION
+#ifdef STOP_BOUNCE_ON_EMISSION
 		if (mat.emission > 0.5) return mat.base_color*mat.emission;
 #endif
 
@@ -68,7 +68,7 @@ namespace pathtracing {
 		ray out_r = {poi + (normal*CLEARANCE_DIST), out_dir};
 		vec3 incoming = trace_path(out_r, max_bounce_count - 1, random_engine);
 
-#ifndef STOP_BOUNCE_ON_EMMISSION
+#ifndef STOP_BOUNCE_ON_EMISSION
 		incoming = incoming + mat.base_color*mat.emission;
 #endif
 

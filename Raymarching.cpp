@@ -29,8 +29,7 @@ namespace raymarching {
 			if (total_dist > max_dist) return false;
 
 			// Successful hit!
-			if (dist <=
-			    RAYMARCHING_MIN_DIST) { // TODO: this could be signed (as in negative still walk (great english))
+			if (dist <= RAYMARCHING_MIN_DIST) { // TODO: this could be signed (as in negative still walk (great english))
 				*poi = p;
 				*alpha = total_dist;
 				*normal = get_normal_at(p);

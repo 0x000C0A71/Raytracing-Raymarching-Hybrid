@@ -176,8 +176,8 @@ namespace polygon {
 			if ((current_normal^r.direction) > 0) continue;
 #endif
 
-			// TODO:                       vvvvvvvvvvvvvvv----- This could be precomputed and cached on the trigon
 			if (!ray_plane_intersection(r, tri.get_plane(), &current_point, &current_alpha)) continue; // TODO: Cache the plane
+			// TODO:                       ^^^^^^^^^^^^^^^----- This could be precomputed and cached on the trigon
 			if (!point_on_trigon(tri, current_point, &throwaway_K)) continue;
 
 			did_hit = true;
@@ -210,7 +210,7 @@ namespace polygon {
 
 		*poi = transform.apply(*poi);
 		*normal = transform.rotation.rotate(loc_normal);
-		*intersected_object = (Node*) this;
+		*intersected_object = (Node*)this;
 
 		return did_hit_mesh;
 	}

@@ -15,27 +15,24 @@
 #define min_S(a, b) ((a) > (b) ? (b) : (a))
 
 
-// Infinities
-inline double inf(double probe) {
-	const unsigned long long k = 0x7FF0000000000000;
-	return *(double*) (&k);
-}
-
-inline float inf(float probe) {
-	const unsigned long int k = 0x7F800000;
-	return *(float*) (&k);
-}
-
-#define INFINITY_S (inf((scalar)1))
-
-
 // Changing this changes the type for the scalar.
 // So you can change this to double for more accuracy
 typedef double scalar;
 
 
-//typedef std::mt19937 rng_engine;
-typedef std::mersenne_twister_engine<unsigned int, 32, 624, 397, 31, 0x9908b0df, 11, 0xffffffff, 7, 0x9d2c5680, 15, 0xefc60000, 18, 1812433253> rng_engine;
+// Infinities
+inline double inf(double probe) {
+	const unsigned long long k = 0x7FF0000000000000;
+	return *(double*)(&k);
+}
+
+inline float inf(float probe) {
+	const unsigned long int k = 0x7F800000;
+	return *(float*)(&k);
+}
+
+#define INFINITY_S (inf((scalar)1))
+
 
 // 3D vectors
 struct vec3 {
@@ -118,17 +115,71 @@ inline vec3 reflect(vec3 v, vec3 n) {
 	return v - (n*(2*(v^n)));
 }
 
-inline vec3 random_normal(rng_engine* engine) {
-	std::uniform_real_distribution<scalar> distribution(-1, 1.0);
-	scalar x = distribution(*engine);
-	scalar y = distribution(*engine);
-	scalar z = distribution(*engine);
-	while (sqLength({x, y, z}) > 1) {
-		x = distribution(*engine);
-		y = distribution(*engine);
-		z = distribution(*engine);
+
+struct xorshf96 {
+	unsigned long x = 123456789, y = 362436069, z = 521288629;
+
+	inline unsigned long xorshf96_() {          //period 2^96-1
+		unsigned long t;
+		x ^= x << 16;
+		x ^= x >> 5;
+		x ^= x << 1;
+
+		t = x;
+		x = y;
+		y = z;
+		z = t^x^y;
+
+		return z;
 	}
-	// TODO: The normalization is not really necessary for reflect_rough. Removing it will speed up the engine and give better reflections.
+
+	static inline float truncate(float b) {
+		unsigned long a = *(unsigned long*)(&b);
+		a &= 0x7FFFFF;
+		a |= 0x3F800000;
+		return *(float*)(&a) - 1;
+	}
+
+	static inline double truncate(double b) {
+		unsigned long long a = *(unsigned long long*)(&b);
+		a &= 0xFFFFFFFFFFFFF;
+		a |= 0x3FF0000000000000;
+		return *(double*)(&a) - 1;
+	}
+
+	inline scalar draw() {
+		const unsigned long raw = xorshf96_();
+		return truncate(*(float*)(&raw))*2 - 1;
+		// TODO:          ^^^^^----- This should be 'scalar', but it doesn't work with doubles. Find out why.
+	}
+};
+
+/*
+struct mersenne_twister {
+	std::mt19937 eng;
+
+
+	inline scalar draw() {
+		std::uniform_real_distribution<scalar> distribution(-1.0, 1.0);
+		return distribution(eng);
+	}
+
+};
+ */
+
+typedef xorshf96 rng_engine;
+
+
+inline vec3 random_normal(rng_engine* engine) {
+	scalar x = engine->draw();
+	scalar y = engine->draw();
+	scalar z = engine->draw();
+	while (sqLength({x, y, z}) > 1) {
+		x = y;
+		y = z;
+		z = engine->draw();
+	}
+	// The line below would normalize the vector, but because that is not needed where I use the function, I commented it out.
 	//return normalize({x, y, z});
 	return {x, y, z};
 }
