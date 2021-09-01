@@ -35,7 +35,7 @@ inline col from_light(vec3 light) {
 			clamp(light.y, 0.0, 1.0),
 			clamp(light.z, 0.0, 1.0),
 	};
-	return {(char) (l2.x*255), (char) (l2.y*255), (char) (l2.z*255)};
+	return {(char)(l2.x*255), (char)(l2.y*255), (char)(l2.z*255)};
 }
 
 int main() {
@@ -125,21 +125,24 @@ int main() {
 	obj_4.mat = {{1, 1, 1}, 0.5, 4};
 	polygon::Node* l[] = {&obj_1, &obj_2, &obj_3, &obj_4};
 	polygon::Group obj = {4, l};
-	obj.build();
+	//obj.build();
 
 
-	raymarching::Object* obj_m = new raymarching::primitives::Torus(0.4, 0.15);
+	//raymarching::Object* obj_m = new raymarching::primitives::Torus(0.4, 0.15);
+	raymarching::Object* obj_m = new raymarching::primitives::Box(0.3, 0.3, 0.3, 0.04);
 	obj_m->transform = {{0, 0, 0},
 	                    {1, 1, 1.5}};
 	obj_m->mat = {{1, 1, 1}, 0.3, 0};
-	obj_m->build();
+	//obj_m->build();
 
-	Pathtracer pt = {&obj, (raymarching::Node*) (obj_m)};
+	Pathtracer pt = {&obj, (raymarching::Node*)(obj_m)};
+	//pt.build();
 
 	Renderer rr = Renderer{pt, width, height, NUMBER_OF_THREADS};
+	rr.build();
 
 
-	vec3* buff = new vec3[width*height];
+	vec3* buff = new vec3[width*height]{{0, 0, 0}};
 
 	start = clock();
 	rr.multisample_frame(buff);
@@ -155,12 +158,10 @@ int main() {
 	}
 	printf("Done!");
 
-
-
 	printf("\nBeginning writing it to a file (with my dodgey bitmap exporter)...");
 
 	export_image(pixels, width, height);
 
 	printf("\nFinished writing it to a file!");
-	printf("\n\nrendering took %.3f seconds!\n", (double) (stop - start)/CLOCKS_PER_SEC);
+	printf("\n\nrendering took %.3f seconds!\n", (double)(stop - start)/CLOCKS_PER_SEC);
 }

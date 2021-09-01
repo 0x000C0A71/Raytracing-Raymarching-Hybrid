@@ -147,10 +147,14 @@ struct xorshf96 {
 		return *(double*)(&a) - 1;
 	}
 
-	inline scalar draw() {
+	inline scalar draw_alpha() {
 		const unsigned long raw = xorshf96_();
-		return truncate(*(float*)(&raw))*2 - 1;
+		return truncate(*(float*)(&raw));
 		// TODO:          ^^^^^----- This should be 'scalar', but it doesn't work with doubles. Find out why.
+	}
+
+	inline scalar draw() {
+		return draw_alpha()*2 - 1;
 	}
 };
 

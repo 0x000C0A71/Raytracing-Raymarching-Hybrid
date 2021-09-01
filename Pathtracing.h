@@ -28,11 +28,16 @@ namespace pathtracing {
 
 		inline bool combined_ray_intersect(ray r, vec3* poi, scalar* dist, vec3* normal, Material* material) const;
 
-		vec3 trace_path(ray r, int max_bounce_count, rng_engine* random_engine) const;
+		vec3 trace_path(ray r, int max_bounce_count, rng_engine* random_engine);
 
 		static inline vec3 get_ambient_color(ray r) {
 			// If you want stuff like HDRIs, implement them here
 			return {0.02, 0.02, 0.02};
+		}
+
+		inline void build() const {
+			polygon_root->build();
+			raymarching_root->build();
 		}
 	};
 }

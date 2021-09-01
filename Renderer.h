@@ -7,21 +7,35 @@
 
 #include "Types.h"
 #include "Pathtracing.h"
-#include <random>
 #include <thread>
+
+#ifdef DO_TELEMETRY
+#include <cstdio>
+#include <ctime>
+#endif
 
 struct Renderer {
 	pathtracing::Pathtracer pt_engine;
 
 	int width, height;
+	scalar _width_f{}, _height_f{};
 	int no_threads;
 	rng_engine random_engine{};
 
-	void sample_frame(vec3* target) const;
+	Renderer(pathtracing::Pathtracer pt_engine, int width, int height, int no_threads)
+			: pt_engine(pt_engine), width(width), height(height), no_threads(no_threads) {}
 
-	void multisample_frame(vec3* target) const;
+	void sample_frame(vec3* target);
 
-	void tonemap_frame(vec3* frame) const;
+	void multisample_frame(vec3* target);
+
+	void tonemap_frame(vec3* frame);
+
+	inline void build() {
+		pt_engine.build();
+		_width_f = 1/((scalar)width);
+		_height_f = 1/((scalar)height);
+	}
 };
 
 #endif //RAYTRACING_RAYMARCHING_HYBRID_RENDERER_H

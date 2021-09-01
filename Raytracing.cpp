@@ -134,10 +134,11 @@ namespace polygon {
 	}
 
 	Box Mesh::get_bounding_box() const {
-		scalar x1, x2;
-		scalar y1, y2;
-		scalar z1, z2;
-		for (int i = 0; i < number_of_verts; i++) {
+		if (number_of_verts <= 0) return {{0, 0, 0}, {0, 0, 0}};
+		scalar x1, x2 = verts[0].x;
+		scalar y1, y2 = verts[0].y;
+		scalar z1, z2 = verts[0].z;
+		for (int i = 1; i < number_of_verts; i++) {
 			const vec3 vert = verts[i];
 			x1 = min_S(x1, vert.x);
 			y1 = min_S(y1, vert.y);

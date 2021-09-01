@@ -46,7 +46,7 @@ namespace pathtracing {
 		return true;
 	}
 
-	vec3 Pathtracer::trace_path(ray r, int max_bounce_count, rng_engine* random_engine) const {
+	vec3 Pathtracer::trace_path(ray r, int max_bounce_count, rng_engine* random_engine) {
 
 		if (max_bounce_count <= 0) return get_ambient_color(r);
 
