@@ -24,7 +24,7 @@ void Renderer::sample_frame(vec3* target) {
 	}
 }
 
-void Renderer::multisample_frame(vec3* target) {
+void Renderer::multisample_frame(vec3* target, int samples) {
 	vec3** buffs = new vec3* [no_threads];
 	for (int i = 0; i < no_threads; i++) {
 		buffs[i] = new vec3[width*height]{{0, 0, 0}};
@@ -36,7 +36,7 @@ void Renderer::multisample_frame(vec3* target) {
 	auto current_time = clock();
 #endif
 
-	for (int i = 0; i < SAMPLES; i += no_threads) {
+	for (int i = 0; i < samples; i += no_threads) {
 		auto* threads = new std::thread[no_threads];
 		for (int t = 0; t < no_threads; t++) {
 			threads[t] = std::thread(&Renderer::sample_frame, this, buffs[t]);
@@ -44,10 +44,10 @@ void Renderer::multisample_frame(vec3* target) {
 
 #ifdef DO_TELEMETRY
 		const double elapsed_t = (double)(current_time - start_time)/CLOCKS_PER_SEC;
-		const double percent = i*((double)1/SAMPLES);
+		const double percent = i*((double)1/samples);
 		const double total_t = elapsed_t/percent;
 		printf("\rRendered %i of %i samples (%.f%%). ETA: %.1f sec (total: %.1f sec)        ",
-			   i, SAMPLES, percent*100, total_t - elapsed_t, total_t);
+			   i, samples, percent*100, total_t - elapsed_t, total_t);
 #endif
 
 		for (int t = 0; t < no_threads; t++) {

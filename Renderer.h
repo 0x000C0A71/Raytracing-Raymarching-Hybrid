@@ -27,7 +27,7 @@ struct Renderer {
 
 	void sample_frame(vec3* target);
 
-	void multisample_frame(vec3* target);
+	void multisample_frame(vec3* target, int samples);
 
 	void tonemap_frame(vec3* frame);
 

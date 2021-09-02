@@ -39,6 +39,11 @@ inline col from_light(vec3 light) {
 }
 
 int main() {
+	int smp, thr;
+	printf("number of samples: ");
+	scanf("%i", &smp);
+	printf("number of threads: ");
+	scanf("%i", &thr);
 	pixels = new col[width*height];
 
 	memset(pixels, 0, width*height*3); // This line could technically be omitted
@@ -128,8 +133,8 @@ int main() {
 	//obj.build();
 
 
-	//raymarching::Object* obj_m = new raymarching::primitives::Torus(0.4, 0.15);
-	raymarching::Object* obj_m = new raymarching::primitives::Box(0.3, 0.3, 0.3, 0.04);
+	raymarching::Object* obj_m = new raymarching::primitives::Torus(0.4, 0.15);
+	//raymarching::Object* obj_m = new raymarching::primitives::Box(0.3, 0.3, 0.3, 0.04);
 	obj_m->transform = {{0, 0, 0},
 	                    {1, 1, 1.5}};
 	obj_m->mat = {{1, 1, 1}, 0.3, 0};
@@ -138,14 +143,16 @@ int main() {
 	Pathtracer pt = {&obj, (raymarching::Node*)(obj_m)};
 	//pt.build();
 
-	Renderer rr = Renderer{pt, width, height, NUMBER_OF_THREADS};
+	//Renderer rr = Renderer{pt, width, height, NUMBER_OF_THREADS};
+	Renderer rr = Renderer{pt, width, height, thr};
 	rr.build();
 
 
 	vec3* buff = new vec3[width*height]{{0, 0, 0}};
 
 	start = clock();
-	rr.multisample_frame(buff);
+	//rr.multisample_frame(buff, SAMPLES);
+	rr.multisample_frame(buff, smp);
 	stop = clock();
 
 	printf("\nFinished rendering the frame!");
