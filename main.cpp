@@ -16,8 +16,8 @@
 using namespace pathtracing;
 
 //        MUST BE DEVISABLE BY 4
-const int width = 512;
-const int height = 512;
+const int width = 1024;
+const int height = 1024;
 
 
 col* pixels;
@@ -107,22 +107,22 @@ int main() {
 			{verts_1,   8, tris_1, 6},
 			{{0, 0, 0}, {0, 0, 0}}
 	};
-	obj_1.mat = {{0.8, 0.8, 0.8}, 1, 0.0};
+	obj_1.mat = {{0.9, 0.9, 0.9}, 1, 0.0, 0};
 	polygon::Object obj_2 = {
 			{verts_2,    4, tris_2, 2},
 			{{0, -1, 0}, {PI_S/2, 0, 0}}
 	};
-	obj_2.mat = {{0.8, 0, 0}, 1, 0.0};
+	obj_2.mat = {{0.9, 0.2, 0.2}, 1, 0.0, 0};
 	polygon::Object obj_3 = {
 			{verts_2,   4, tris_2, 2},
 			{{0, 1, 0}, {-(PI_S/2), 0, 0}}
 	};
-	obj_3.mat = {{0, 0.8, 0}, 1, 0.0};
+	obj_3.mat = {{0.2, 0.9, 0.2}, 1, 0.0, 0};
 	polygon::Object obj_4 = {
 			{verts_3,     4, tris_3, 2},
-			{{0, 0, 0.9}, {0, 0, 0}}
+			{{0, 0, 0.999}, {0, 0, 0}}
 	};
-	obj_4.mat = {{1, 1, 1}, 0.5, 4};
+	obj_4.mat = {{1, 1, 1}, 1, 1, 0};
 	polygon::Node* l[] = {&obj_1, &obj_2, &obj_3, &obj_4};
 	polygon::Group obj = {4, l};
 	//obj.build();
@@ -130,9 +130,10 @@ int main() {
 
 	//raymarching::Object* obj_m = new raymarching::primitives::Torus(0.4, 0.15);
 	raymarching::Object* obj_m = new raymarching::primitives::Box(0.3, 0.3, 0.3, 0.04);
+	//raymarching::Object* obj_m = new raymarching::primitives::Sphere(0.5);
 	obj_m->transform = {{0, 0, 0},
 	                    {1, 1, 1.5}};
-	obj_m->mat = {{1, 1, 1}, 0.3, 0};
+	obj_m->mat = {{0.9, 0.9, 0.9}, 1, 0, 1};
 	//obj_m->build();
 
 	Pathtracer pt = {&obj, (raymarching::Node*)(obj_m)};

@@ -7,8 +7,7 @@
 
 #include "fast_inverse_square_root.h"
 #include <cmath> // TODO: Please remove this. I hate depending on libraries. It's my kryptonite
-#include <cstdlib> // TODO: Please remove this. I hate depending on libraries. It's my kryptonite
-#include <random>
+//#include <random>
 
 
 #define max_S(a, b) ((a) > (b) ? (a) : (b))
@@ -317,6 +316,7 @@ struct Material {
 	vec3 base_color;
 	scalar roughness;
 	scalar emission;
+	scalar metallic;
 };
 
 

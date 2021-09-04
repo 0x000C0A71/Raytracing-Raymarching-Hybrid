@@ -13,12 +13,21 @@
 namespace pathtracing {
 
 
-	inline vec3 reflect_rough(vec3 normal, vec3 vector, scalar roughness, rng_engine* random_engine) {
+	inline vec3 reflect_diffuse(vec3 normal, vec3 vector, scalar roughness, rng_engine* random_engine) {
 		vec3 rand_vec = random_normal(random_engine);
 		const vec3 ref_vec = reflect(vector, normal);
-		if ((rand_vec^normal) < 0) rand_vec = rand_vec*(-1);
+		//if ((rand_vec^normal) < 0) rand_vec = rand_vec*(-1);
+		// Apparently uncommenting  this line makes it more physically accurate, but looking at the results, I think it looks more
+		// physically accurate like this (I am lacking the BSDF)
+		//                           vvvvvvvvv---- This would also have to be taken out
+		return lerp(ref_vec, rand_vec + normal, roughness);
+	}
 
-		return normalize(lerp(ref_vec, rand_vec, roughness));
+	inline vec3 reflect_metallic(vec3 normal, vec3 vector, scalar roughness, rng_engine* random_engine) {
+		vec3 rand_vec = random_normal(random_engine);
+		const vec3 ref_vec = reflect(vector, normal);
+		const vec3 out_dir = ref_vec + rand_vec*(normal^vector)*roughness;
+		return out_dir;
 	}
 
 
@@ -32,7 +41,8 @@ namespace pathtracing {
 
 		static inline vec3 get_ambient_color(ray r) {
 			// If you want stuff like HDRIs, implement them here
-			return {0.02, 0.02, 0.02};
+			return (vec3{0.7411764706, 0.8509803922, 1}*(0.2/1.7303841221));
+			//return {0.05, 0.05, 0.05};
 		}
 
 		inline void build() const {

@@ -64,8 +64,11 @@ namespace pathtracing {
 		if (mat.emission > 0.5) return mat.base_color*mat.emission;
 #endif
 
-		const vec3 out_dir = reflect_rough(normal, r.direction, mat.roughness, random_engine);
-		ray out_r = {poi + (normal*CLEARANCE_DIST), out_dir};
+		const vec3 diffuse_dir = reflect_diffuse(normal, r.direction, mat.roughness, random_engine);
+		const vec3 metallic_dir = reflect_metallic(normal, r.direction, mat.roughness, random_engine);
+		const vec3 out_dir = normalize(lerp(diffuse_dir, metallic_dir, mat.metallic));
+
+		ray out_r = {poi + (out_dir*CLEARANCE_DIST), out_dir};
 		vec3 incoming = trace_path(out_r, max_bounce_count - 1, random_engine);
 
 #ifndef STOP_BOUNCE_ON_EMISSION

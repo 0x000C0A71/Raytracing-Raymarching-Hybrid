@@ -6,7 +6,7 @@
 
 void Renderer::sample_frame(vec3* target) {
 	// Setting up the ray
-	ray r = {{-3, 0, 0},
+	ray r = {{-4, 0, 0},
 	         {0,  0, 1}};
 
 	const scalar off_x = random_engine.draw_alpha();
@@ -16,7 +16,7 @@ void Renderer::sample_frame(vec3* target) {
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
 
-			r.direction = {2, ((scalar)x + off_x)*_width_f*2 - 1, ((scalar)y + off_y)*_height_f*2 - 1};
+			r.direction = {3, ((scalar)x + off_x)*_width_f*2 - 1, ((scalar)y + off_y)*_height_f*2 - 1};
 			r.direction = normalize(r.direction);
 
 			target[y*width + x] = pt_engine.trace_path(r, MAX_BOUNCE_COUNT, &random_engine);;
@@ -26,6 +26,7 @@ void Renderer::sample_frame(vec3* target) {
 
 void Renderer::multisample_frame(vec3* target) {
 	vec3** buffs = new vec3* [no_threads];
+	auto* threads = new std::thread[no_threads];
 	for (int i = 0; i < no_threads; i++) {
 		buffs[i] = new vec3[width*height]{{0, 0, 0}};
 	}
@@ -37,7 +38,6 @@ void Renderer::multisample_frame(vec3* target) {
 #endif
 
 	for (int i = 0; i < SAMPLES; i += no_threads) {
-		auto* threads = new std::thread[no_threads];
 		for (int t = 0; t < no_threads; t++) {
 			threads[t] = std::thread(&Renderer::sample_frame, this, buffs[t]);
 		}
