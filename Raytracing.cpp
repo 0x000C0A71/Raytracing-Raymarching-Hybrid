@@ -39,9 +39,9 @@ namespace polygon {
 		const vec3 vai = I - tri.A;
 		const vec3 vbi = I - tri.B;
 
-		const scalar aDist = glm::dot(vbi, aNormal)*Q_rsqrt(sqLength(aNormal));
-		const scalar bDist = glm::dot(vai, bNormal)*Q_rsqrt(sqLength(bNormal));
-		const scalar cDist = glm::dot(vai, cNormal)*Q_rsqrt(sqLength(cNormal));
+		const scalar aDist = glm::dot(vbi, aNormal)*Q_rsqrt(glm::length2(aNormal));
+		const scalar bDist = glm::dot(vai, bNormal)*Q_rsqrt(glm::length2(bNormal));
+		const scalar cDist = glm::dot(vai, cNormal)*Q_rsqrt(glm::length2(cNormal));
 
 		if ((aDist < 0) || (bDist < 0) || (cDist < 0)) return false;
 
@@ -134,7 +134,9 @@ namespace polygon {
 	}
 
 	Box Mesh::get_bounding_box() const {
-		if (number_of_verts <= 0) return {{0, 0, 0}, {0, 0, 0}};
+		if (number_of_verts <= 0)
+			return {{0, 0, 0},
+			        {0, 0, 0}};
 		scalar x1, x2 = verts[0].x;
 		scalar y1, y2 = verts[0].y;
 		scalar z1, z2 = verts[0].z;

@@ -18,7 +18,7 @@ namespace raymarching {
 			explicit Sphere(scalar radius) : radius(radius) {}
 
 			scalar distance_function(vec3 p) const override {
-				return fsqrt(sqLength(p)) - radius;
+				return fsqrt(glm::length2(p)) - radius;
 			}
 		};
 
@@ -27,13 +27,14 @@ namespace raymarching {
 			scalar radius = 0;
 
 			Box(scalar width, scalar depth, scalar height) : dimensions({width, depth, height}) {};
+
 			Box(scalar width, scalar depth, scalar height, scalar radius) : dimensions({width, depth, height}), radius(radius) {};
 
 			scalar distance_function(vec3 p) const override {
 				const vec3 q = glm::abs(p) - dimensions;
 				const scalar k = max_S(q.y, q.z);
 				const scalar l = max_S(q.x, k);
-				return fsqrt(sqLength({max_S(q.x, 0.0), max_S(q.y, 0.0), max_S(q.z, 0.0)})) + min_S(l, 0.0) - radius;
+				return fsqrt(glm::length2(vec3{max_S(q.x, 0.0), max_S(q.y, 0.0), max_S(q.z, 0.0)})) + min_S(l, 0.0) - radius;
 			}
 		};
 

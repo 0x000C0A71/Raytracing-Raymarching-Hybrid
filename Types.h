@@ -6,9 +6,8 @@
 #define RAYTRACING_RAYMARCHING_HYBRID_TYPES_H
 
 #include "fast_inverse_square_root.h"
-#include <cmath> // TODO: Please remove this. I hate depending on libraries. It's my kryptonite
-#include <glm/vec3.hpp>
 #include <glm/glm.hpp>
+#include <glm/gtx/norm.hpp>
 //#include <random>
 
 
@@ -37,31 +36,21 @@ inline float inf(float probe) {
 #define INFINITY_S (inf((scalar)1))
 
 
-
 // Linearly interpolates between vector a & b.
 // TODO: make more efficient
 inline vec3 lerp(vec3 a, vec3 b, scalar t) {
-	return {
-			(1 - t)*a.x + t*b.x,
-			(1 - t)*a.y + t*b.y,
-			(1 - t)*a.z + t*b.z,
-	};
+	return a*(1 - t) + b*t;
 }
 
-
-// Return the squared length of a given vector.
-inline scalar sqLength(vec3 v) {
-	return v.x*v.x + v.y*v.y + v.z*v.z;
-}
 
 inline vec3 normalize(vec3 v) {
-	const scalar sqLen = sqLength(v);
+	const scalar sqLen = glm::length2(v);
 	const scalar factor = Q_rsqrt(sqLen);
 	return v*factor;
 }
 
 inline vec3 reflect(vec3 v, vec3 n) {
-	return v - (n*(2*glm::dot(v,n)));
+	return v - (n*(2*glm::dot(v, n)));
 }
 
 
@@ -124,25 +113,24 @@ typedef xorshf96 rng_engine;
 
 
 inline vec3 random_normal(rng_engine* engine) {
-	scalar x = engine->draw();
-	scalar y = engine->draw();
-	scalar z = engine->draw();
-	while (sqLength({x, y, z}) > 1) {
-		x = y;
-		y = z;
-		z = engine->draw();
+	const scalar x = engine->draw();
+	const scalar y = engine->draw();
+	const scalar z = engine->draw();
+	vec3 v = vec3{x, y, z};
+	while (glm::length2(v) > 1) {
+		v.x = v.y;
+		v.y = v.z;
+		v.z = engine->draw();
 	}
 	// The line below would normalize the vector, but because that is not needed where I use the function, I commented it out.
-	//return normalize({x, y, z});
-	return {x, y, z};
+	//return normalize(v);
+	return v;
 }
 
 struct ray {
 	vec3 origin;
 	vec3 direction;
 };
-
-
 
 
 struct rotator {
