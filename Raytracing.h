@@ -21,7 +21,7 @@ namespace polygon {
 		vec3 A, B, C;
 
 		// Returns the normal of the trigon.
-		inline vec3 get_normal() const { return normalize((B - A)*(C - A)); }
+		inline vec3 get_normal() const { return normalize(glm::cross((B - A), (C - A))); }
 
 		// Generates the plane coefficients.
 		inline plane get_plane(vec3 normal) const {

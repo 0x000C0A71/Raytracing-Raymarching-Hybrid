@@ -7,6 +7,8 @@
 
 #include "fast_inverse_square_root.h"
 #include <cmath> // TODO: Please remove this. I hate depending on libraries. It's my kryptonite
+#include <glm/vec3.hpp>
+#include <glm/glm.hpp>
 //#include <random>
 
 
@@ -17,6 +19,8 @@
 // Changing this changes the type for the scalar.
 // So you can change this to double for more accuracy
 typedef double scalar;
+typedef glm::dvec3 vec3;
+typedef glm::dmat3x3 mat3;
 
 
 // Infinities
@@ -33,63 +37,9 @@ inline float inf(float probe) {
 #define INFINITY_S (inf((scalar)1))
 
 
-// 3D vectors
-struct vec3 {
-	scalar x, y, z;
-
-	inline vec3 operator+(vec3 other) const {
-		return {
-				x + other.x,
-				y + other.y,
-				z + other.z,
-		};
-	}
-
-	inline vec3 operator-(vec3 other) const {
-		return {
-				x - other.x,
-				y - other.y,
-				z - other.z,
-		};
-	}
-
-	// Scaling a vector by a scalar
-	inline vec3 operator*(scalar factor) const {
-		return {
-				x*factor,
-				y*factor,
-				z*factor,
-		};
-	}
-
-	// The cross product. It might be a bit confusing to overload it on the multiply operator, but I think it's apt,
-	// since multiplication is sometimes written with an X.
-	inline vec3 operator*(vec3 other) const {
-		return {
-				y*other.z - z*other.y,
-				z*other.x - x*other.z,
-				x*other.y - y*other.x,
-		};
-	}
-
-	// The Dot product. Again overloading it over the xor operator might be a bit confusing. As opposed to the
-	// cross product though, I do not have a reason for it other than having it on an operator makes the code a bit
-	// tidier.
-	inline scalar operator^(vec3 other) const {
-		return x*other.x + y*other.y + z*other.z;
-	}
-
-
-	inline vec3 abs() const {
-		return {
-				x < 0 ? -x : x,
-				y < 0 ? -y : y,
-				z < 0 ? -z : z
-		};
-	}
-};
 
 // Linearly interpolates between vector a & b.
+// TODO: make more efficient
 inline vec3 lerp(vec3 a, vec3 b, scalar t) {
 	return {
 			(1 - t)*a.x + t*b.x,
@@ -111,7 +61,7 @@ inline vec3 normalize(vec3 v) {
 }
 
 inline vec3 reflect(vec3 v, vec3 n) {
-	return v - (n*(2*(v^n)));
+	return v - (n*(2*glm::dot(v,n)));
 }
 
 
@@ -193,17 +143,6 @@ struct ray {
 };
 
 
-struct mat3 {
-	vec3 col_1, col_2, col_3;
-
-	inline vec3 operator*(vec3 v) const {
-		return col_1*v.x + col_2*v.y + col_3*v.z;
-	}
-
-	inline mat3 operator*(mat3 o) const {
-		return {operator*(o.col_1), operator*(o.col_2), operator*(o.col_3)};
-	}
-};
 
 
 struct rotator {
@@ -216,12 +155,12 @@ struct rotator {
 	inline void generate_matrices() {
 		// Doing the painful trig functions first and caching them in a rotation matrix
 
-		const scalar sin_r = sin(roll);
-		const scalar cos_r = cos(roll);
-		const scalar sin_p = sin(pitch);
-		const scalar cos_p = cos(pitch);
-		const scalar sin_y = sin(yaw);
-		const scalar cos_y = cos(yaw);
+		const scalar sin_r = glm::sin(roll);
+		const scalar cos_r = glm::cos(roll);
+		const scalar sin_p = glm::sin(pitch);
+		const scalar cos_p = glm::cos(pitch);
+		const scalar sin_y = glm::sin(yaw);
+		const scalar cos_y = glm::cos(yaw);
 		// TODO: use different trig functions, as these are not type agnostic (plus I hate having to use a library).
 
 		// forward matrices

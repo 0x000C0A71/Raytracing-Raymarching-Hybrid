@@ -26,7 +26,7 @@ namespace pathtracing {
 	inline vec3 reflect_metallic(vec3 normal, vec3 vector, scalar roughness, rng_engine* random_engine) {
 		vec3 rand_vec = random_normal(random_engine);
 		const vec3 ref_vec = reflect(vector, normal);
-		const vec3 out_dir = ref_vec + rand_vec*(normal^vector)*roughness;
+		const vec3 out_dir = ref_vec + rand_vec*glm::dot(normal, vector)*roughness;
 		return out_dir;
 	}
 

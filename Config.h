@@ -11,7 +11,7 @@
 
 // Pathtracing
 #define NUMBER_OF_THREADS 10       // The number of render threads to use
-#define SAMPLES 2048               // Number of samples per pixel. This will be rounded up to the closest multiple of the number of threads
+#define SAMPLES 1024               // Number of samples per pixel. This will be rounded up to the closest multiple of the number of threads
 #define MAX_BOUNCE_COUNT 18       // The number of bounces to which the pathtracer will be limited
 #define CLEARANCE_DIST 0.001      // The distance that will be moved away from a surface tp clear it.
 #define STOP_BOUNCE_ON_EMISSION   // Whether the engine should disregard bounce light bouncing off of emissive surfaces

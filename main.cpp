@@ -16,8 +16,8 @@
 using namespace pathtracing;
 
 //        MUST BE DEVISABLE BY 4
-const int width = 1024;
-const int height = 1024;
+const int width = 512;
+const int height = 512;
 
 
 col* pixels;

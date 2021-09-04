@@ -32,16 +32,16 @@ namespace polygon {
 
 	bool point_on_trigon(trigon tri, vec3 I, vec3* K) {
 		const vec3 Normal = tri.get_normal(); // TODO: this can be used as an input and we can save 1 call to this function like that.
-		const vec3 aNormal = (tri.B - tri.C)*Normal;
-		const vec3 bNormal = (tri.C - tri.A)*Normal;
-		const vec3 cNormal = (tri.A - tri.B)*Normal;
+		const vec3 aNormal = glm::cross((tri.B - tri.C), Normal);
+		const vec3 bNormal = glm::cross((tri.C - tri.A), Normal);
+		const vec3 cNormal = glm::cross((tri.A - tri.B), Normal);
 
 		const vec3 vai = I - tri.A;
 		const vec3 vbi = I - tri.B;
 
-		const scalar aDist = (vbi^aNormal)*Q_rsqrt(sqLength(aNormal));
-		const scalar bDist = (vai^bNormal)*Q_rsqrt(sqLength(bNormal));
-		const scalar cDist = (vai^cNormal)*Q_rsqrt(sqLength(cNormal));
+		const scalar aDist = glm::dot(vbi, aNormal)*Q_rsqrt(sqLength(aNormal));
+		const scalar bDist = glm::dot(vai, bNormal)*Q_rsqrt(sqLength(bNormal));
+		const scalar cDist = glm::dot(vai, cNormal)*Q_rsqrt(sqLength(cNormal));
 
 		if ((aDist < 0) || (bDist < 0) || (cDist < 0)) return false;
 
@@ -64,7 +64,7 @@ namespace polygon {
 		// Next easier case
 		const vec3 midpoint = (A + B)*0.5;
 		const vec3 vec_to_mid = midpoint - r.origin;
-		const vec3 nearest_point = r.direction*(vec_to_mid^r.direction) + r.origin;
+		const vec3 nearest_point = r.direction*glm::dot(vec_to_mid, r.direction) + r.origin;
 		const bool nearest_point_in_box = point_in_box(nearest_point);
 		if (nearest_point_in_box) { return true; }
 
@@ -174,7 +174,7 @@ namespace polygon {
 			const vec3 current_normal = tri.get_normal();
 
 #ifdef DO_BACKFACE_CULLING
-			if ((current_normal^r.direction) > 0) continue;
+			if (glm::dot(current_normal, r.direction) > 0) continue;
 #endif
 
 			if (!ray_plane_intersection(r, tri.get_plane(), &current_point, &current_alpha)) continue; // TODO: Cache the plane
