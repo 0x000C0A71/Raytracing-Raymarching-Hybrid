@@ -207,21 +207,25 @@ struct rotator {
 struct Transform {
 	vec3 translation;
 	rotator rotation;
-	// vec3 scale;
+	scalar scale = 1;
+	scalar _i_scale = 1;
 
 	inline void build() {
 		rotation.generate_matrices();
+		_i_scale = 1.0/scale;
 	}
 
 	inline vec3 apply(vec3 p) const {
 		const vec3 r = rotation.rotate(p);
-		const vec3 t = r + translation;
+		const vec3 s = r*scale;
+		const vec3 t = s + translation;
 		return t;
 	}
 
 	inline vec3 deapply(vec3 p) const {
 		const vec3 t = p - translation;
-		const vec3 r = rotation.derotate(t);
+		const vec3 s = t*_i_scale;
+		const vec3 r = rotation.derotate(s);
 		return r;
 	}
 
@@ -235,6 +239,14 @@ struct Transform {
 		r.origin = deapply(r.origin);
 		r.direction = rotation.derotate(r.direction);
 		return r;
+	}
+
+	inline scalar apply(scalar v) const {
+		return v*scale;
+	}
+
+	inline scalar deapply(scalar v) const {
+		return v*_i_scale;
 	}
 };
 
