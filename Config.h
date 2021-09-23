@@ -20,7 +20,7 @@
 #define DO_BACKFACE_CULLING       // Whether the engine should cull faces that face away from the camera
 
 // Raymarching
-#define RAYMARCHING_MAX_STEPS 100       // The max number of steps to be taken in the raymarching part of the engine
+#define RAYMARCHING_MAX_STEPS 1000       // The max number of steps to be taken in the raymarching part of the engine
 #define RAYMARCHING_MIN_DIST 0.0001     // The minimal distance to count as a hit
 #define RAYMARCHING_NORMAL_OFFSET 0.01  // This distance will be taken from a point to compute it's normal
 

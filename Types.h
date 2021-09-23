@@ -8,11 +8,14 @@
 #include "fast_inverse_square_root.h"
 #include <glm/glm.hpp>
 #include <glm/gtx/norm.hpp>
+#include <glm/ext.hpp>
+#include <glm/gtx/fast_trigonometry.hpp>
+#include <glm/gtx/fast_exponential.hpp>
 //#include <random>
 
 
-#define max_S(a, b) ((a) > (b) ? (a) : (b))
-#define min_S(a, b) ((a) > (b) ? (b) : (a))
+//#define max_S(a, b) ((a) > (b) ? (a) : (b))
+//#define min_S(a, b) ((a) > (b) ? (b) : (a))
 
 
 // Changing this changes the type for the scalar.
@@ -21,6 +24,8 @@ typedef double scalar;
 typedef glm::dvec3 vec3;
 typedef glm::dmat3x3 mat3;
 
+inline scalar max_S(scalar a, scalar b) { return a > b ? a : b; }
+inline scalar min_S(scalar a, scalar b) { return a > b ? b : a; }
 
 // Infinities
 inline double inf(double probe) {

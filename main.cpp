@@ -112,7 +112,7 @@ int main() {
 			{verts_2,    4, tris_2, 2},
 			{{0, -1, 0}, {PI_S/2, 0, 0}}
 	};
-	obj_2.mat = {{0.9, 0.2, 0.2}, 0, 0.0, 0};
+	obj_2.mat = {{0.9, 0.2, 0.2}, 1, 0.0, 0};
 	polygon::Object obj_3 = {
 			{verts_2,   4, tris_2, 2},
 			{{0, 1, 0}, {-(PI_S/2), 0, 0}}
@@ -131,19 +131,22 @@ int main() {
 	//raymarching::Object* obj_m = new raymarching::primitives::Torus(0.4, 0.15);
 	raymarching::Object* obj_m1 = new raymarching::primitives::Box(0.3, 0.3, 0.3, 0.04);
 	//raymarching::Object* obj_m = new raymarching::primitives::Sphere(0.5);
-	obj_m1->transform = {{0, -0.5, 0},
-	                    {1, 1, 1.5}, 0.5};
-	obj_m1->mat = {{0.9, 0.9, 0.9}, 1, 0, 1};
+	//raymarching::Object* obj_m1 = new raymarching::primitives::Mandelbulb(30, 100);
+	obj_m1->transform = {{0, 0, 0},
+	                    {1.0, 1.0, 1.5}, 1};
+	obj_m1->mat = {{0.9, 0.2, 0.2}, 0.7, 0, 1};
 	//obj_m->build();
 
 	raymarching::Object* obj_m2 = new raymarching::primitives::Torus(0.4, 0.15);
 	obj_m2->transform = {{0, 0, 0},
 	                     {1, 1, 1.5}, 1};
-	obj_m2->mat = {{0.9, 0.9, 0.9}, 1, 0, 0};
+	obj_m2->mat = {{0.2, 0.9, 0.2}, 1, 0, 0};
 	raymarching::Node* m[] = {obj_m1, obj_m2};
-	raymarching::Merger* obj_m = new raymarching::Merger(2, m);
-
-	Pathtracer pt = {&obj, (raymarching::Node*)(obj_m1)};
+	//raymarching::Merger* obj_m = new raymarching::Merger(2, m);
+	raymarching::Merger* obj_m = new raymarching::primitives::SmoothSubtraction(0.05);
+	obj_m->no_children = 2;
+	obj_m->children = m;
+	Pathtracer pt = {&obj, (raymarching::Node*)(obj_m)};
 	//pt.build();
 
 	Renderer rr = Renderer{pt, width, height, NUMBER_OF_THREADS};

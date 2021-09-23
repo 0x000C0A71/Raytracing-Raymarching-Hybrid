@@ -37,7 +37,9 @@ namespace raymarching {
 		virtual scalar distance_function(vec3 p) const { return INFINITY_S; } // To be overridden
 
 		scalar distance_estimation(vec3 p) const override {
-			return transform.apply(this->distance_function(transform.deapply(p)));
+			const vec3 t = transform.deapply(p);
+			const scalar d = this->distance_function(t);
+			return transform.apply(d);
 		}
 
 		Node* get_closest_Object(vec3 p) const override { return (Node*) this; }
