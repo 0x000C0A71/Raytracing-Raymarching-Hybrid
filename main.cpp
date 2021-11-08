@@ -134,7 +134,7 @@ int main() {
 	//raymarching::Object* obj_m1 = new raymarching::primitives::Mandelbulb(30, 100);
 	obj_m1->transform = {{0, 0, 0},
 	                    {1.0, 1.0, 1.5}, 1};
-	obj_m1->mat = {{0.9, 0.2, 0.2}, 0.7, 0, 1};
+	obj_m1->mat = {{0.9, 0.9, 0.9}, 0.7, 0, 1};
 	//obj_m->build();
 
 	raymarching::Object* obj_m2 = new raymarching::primitives::Torus(0.4, 0.15);
@@ -146,7 +146,12 @@ int main() {
 	raymarching::Merger* obj_m = new raymarching::primitives::SmoothSubtraction(0.05);
 	obj_m->no_children = 2;
 	obj_m->children = m;
-	Pathtracer pt = {&obj, (raymarching::Node*)(obj_m)};
+
+	raymarching::Object* obj_b = new raymarching::primitives::Mandelbulb(100, 100);
+	obj_b->transform = {{0, 0, 0},
+						 {1, 1, 1.5}, 0.6};
+	obj_b->mat = {{0.4, 0.4, 0.9}, 1, 0, 1};
+	Pathtracer pt = {&obj, (raymarching::Node*)(obj_m1)};
 	//pt.build();
 
 	Renderer rr = Renderer{pt, width, height, NUMBER_OF_THREADS};

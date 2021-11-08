@@ -11,7 +11,7 @@ void Renderer::sample_frame(vec3* target) {
 
 	const scalar off_x = random_engine.draw_alpha();
 	const scalar off_y = random_engine.draw_alpha();
-	// TODO              ^^^^^^^^^^^^^^^^^^^^^^^^^^---- This method of sueprsampling is rather crude and can be improved
+	// TODO              ^^^^^^^^^^^^^^^^^^^^^^^^^^---- This method of supersampling is rather crude and can be improved
 
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {

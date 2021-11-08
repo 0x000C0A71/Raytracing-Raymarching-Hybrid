@@ -42,7 +42,6 @@ inline float inf(float probe) {
 
 
 // Linearly interpolates between vector a & b.
-// TODO: make more efficient
 inline vec3 lerp(vec3 a, vec3 b, scalar t) {
 	return a*(1 - t) + b*t;
 }
@@ -154,7 +153,7 @@ struct rotator {
 		const scalar cos_p = glm::cos(pitch);
 		const scalar sin_y = glm::sin(yaw);
 		const scalar cos_y = glm::cos(yaw);
-		// TODO: use different trig functions, as these are not type agnostic (plus I hate having to use a library).
+		// TODO: use different trig functions, as these are not type agnostic.
 
 		// forward matrices
 		const mat3 roll_f = {

@@ -57,62 +57,36 @@ namespace raymarching {
 
 			Mandelbulb(int Iterations, int Bailout) : Iterations(Iterations), Bailout(Bailout) {}
 
-			/*
-			void boxFold(vec3* z, scalar* dz) const {
-				*z = glm::clamp(*z, -foldingLimit, foldingLimit)*2.0 - *z;
-			}
-
-			void sphereFold(vec3* z, scalar* dz) const {
-				scalar r2 = glm::dot(*z, *z);
-				if (r < minRadius2) {
-					// linear inner scalling
-					scalar temp = (fixedRadius2/minRadius2);
-					*z *= temp;
-					*dz *= temp;
-				} else if (r2 < fixedRadius2) {
-					// this is the actual sphere inversion
-					scalar temp = (fixedRadius2/r2);
-					*z *= temp;
-					*dz *= temp;
-				}
-			}
-
-			scalar distance_function(vec3 p) const override {
-				vec3 z = p;
-				vec3 offset = z;
-				scalar dr = 1.0;
-				for (int n = 0; n < Iterations; n++) {
-					boxFold(&z, &dr);
-					sphereFold(&z, &dr);
-
-					z = Scale*z + offset;
-					dr = dr*abs(Scale)+1.0;
-				}
-				scalar r = glm::length(z);
-				return r/abs(dr);
-			}*/
-
-
 			scalar distance_function(vec3 p) const override {
 				vec3 z = p;
 				scalar dr = 1.0;
 				scalar r = 0.0;
 				for (int i = 0; i < Iterations; i++) {
-					r = glm::length2(z);
-					if (r > (Bailout*Bailout)) break;
+					const scalar r_sq = glm::length2(z);
+					const scalar r_inv = Q_rsqrt(r_sq);
+					r = 1/r_inv;
+					if (r_sq > (Bailout*Bailout)) break;
 
 					// convert to polar coordinates
-					scalar theta = glm::fastAcos(z.z/r); // gruusig
-					scalar phi = glm::fastAtan(z.y, z.x); // gruusig
-					dr = (r*r*r*r*r*r*r)*8*dr + 1.0;
+					const scalar theta = glm::fastAcos(z.z * r_inv); // gruusig
+					const scalar phi = glm::fastAtan(z.y, z.x); // gruusig
+
+					const scalar r_p2 = r_sq;
+					const scalar r_p4 = r_p2*r_p2;
+
+					dr = (r_p4*r_p2*r)*8*dr + 1.0;
 
 					// scale and rotate the point
-					scalar zr = r*r*r*r*r*r*r*r;
-					theta = theta*8;
-					phi = phi*8;
+					const scalar zr = r_p4*r_p4;
+					const scalar theta_2 = theta*8;
+					const scalar phi_2 = phi*8;
 
 					// convert back to cartesian coordinates
-					z = zr*vec3{glm::fastSin(theta)*glm::fastCos(phi), glm::fastSin(phi)*glm::fastSin(theta), glm::fastCos(theta)};
+					const scalar sin_theta = glm::fastSin(theta_2);
+					const scalar cos_theta = glm::fastCos(theta_2);
+					const scalar sin_phi = glm::fastSin(phi_2);
+					const scalar cos_phi = glm::fastCos(phi_2);
+					z = zr*vec3{sin_theta*cos_phi,sin_phi*sin_theta, cos_theta};
 					z = z + p;
 				}
 				return 0.5*glm::fastLog(r)*r/dr;
